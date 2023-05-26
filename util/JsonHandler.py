@@ -5,9 +5,12 @@ noreplylist = "noreplyusers.json"
 
 def init_json():
     if os.path.isfile(noreplylist) == False:
-        fp = open(noreplylist, "w")
-        fp.write("{}")
-        fp.close()
+        new_json(noreplylist)
+
+def new_json(name):
+    fp = open(name, "w")
+    fp.write("{}")
+    fp.close()
 
 def load_users():
     with open("noreplyusers.json", 'r') as f:
