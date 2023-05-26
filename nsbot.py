@@ -2,6 +2,8 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 import json
+import os
+from dotenv import load_dotenv 
 
 EXTENSIONS = ("extensions.test")
 INTENTS = discord.Intents.default()
@@ -210,4 +212,4 @@ async def on_message(message):
                     await message.channel.send(reference=message, embed=installmods, view=view)
                     print(f"Installing mods embed reply sent")
 
-bot.run('no token for you')
+bot.run(os.getenv("TOKEN"))
