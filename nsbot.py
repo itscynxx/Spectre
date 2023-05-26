@@ -116,5 +116,5 @@ async def on_message(message):
             elif any(x in message.content.lower() for x in ["help installing mods", "help getting mods"]):
                     await message.channel.send(reference=message, embed=installmods, view=view)
                     print(f"Installing mods embed reply sent")
-
+load_dotenv()
 bot.run(os.getenv("TOKEN"))
