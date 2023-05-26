@@ -1,1 +1,4 @@
 .env
+util/__pycache__
+cogs/__pycache__
+noreplyusers.json
