@@ -12,6 +12,10 @@ repliesoff = discord.Embed(title="Automatic bot replies set to ***OFF***", color
 replystatusenabled = discord.Embed(title="Automatic bot replies are currently enabled", color=0x6495ED)
 replystatusdisabled = discord.Embed(title="Automatic bot replies are currently disabled", color=0x6495ED)
 
+
+def replycheck():
+    return replies
+
 class GlobalReplies(commands.Cog):
     def __init__(self, bot :commands.Bot) -> None:
         self.bot = bot
@@ -19,7 +23,7 @@ class GlobalReplies(commands.Cog):
     # Stops replies across all servers
     @commands.hybrid_command(description="Globally disables Spectre replying to messages")
     async def stop(self, ctx):
-        if ctx.author.id == 502519988423229460:
+        if ctx.author.id == self.bot.owner_id:
             global replies
             replies = False
             await ctx.send(embed=repliesoff)
@@ -30,7 +34,7 @@ class GlobalReplies(commands.Cog):
     # Starts replies across all servers
     @commands.hybrid_command(description="Globally enables Spectre replying to messages")
     async def start(self, ctx):
-        if ctx.author.id == 502519988423229460:
+        if ctx.author.id == self.bot.owner_id:
             global replies
             replies = True
             await ctx.send(embed=replieson)
@@ -48,3 +52,5 @@ class GlobalReplies(commands.Cog):
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(GlobalReplies(bot))
+
+    

@@ -24,15 +24,14 @@ class InstallationChannel(commands.Cog):
 
     # Slash command to send the embeds for the installation channel
     @commands.hybrid_command()
-    async def installation(self, message): 
-        if interaction.user.id == 502519988423229460:
-
-            await message.channel.send(embed=helpembed)
-            await message.channel.send(embed=manual)
-            await message.channel.send(embed=installation)
+    async def installation(self, ctx): 
+        if ctx.author.id == self.bot.owner_id:
+            await ctx.channel.send(embed=helpembed)
+            await ctx.channel.send(embed=manual)
+            await ctx.channel.send(embed=installation)
 
         else:
-            await message.channel.send("You don't have permission to use this command!", ephemeral=True)
+            await ctx.channel.send("You don't have permission to use this command!", ephemeral=True)
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(InstallationChannel(bot))
