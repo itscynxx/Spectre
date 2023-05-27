@@ -44,6 +44,7 @@ class AutoResponse(commands.Cog):
     def __init__(self, bot :commands.Bot) -> None:
         self.bot = bot
         self.last_time = datetime.datetime.utcfromtimestamp(0)
+        self.last_channel = 0
     
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -52,7 +53,9 @@ class AutoResponse(commands.Cog):
         channel = util.JsonHandler.load_channels()
         time_diff = (datetime.datetime.utcnow() - self.last_time).total_seconds()
 
-        if time_diff < config["cooldowntime"]:
+
+        if not (time_diff > config["cooldowntime"] or message.channel.id != self.last_channel):
+            self.last_channel = message.channel.id            
             print(f"Tried to send message while on cooldown! Didn't send message!")
             return
         else:
@@ -79,6 +82,7 @@ class AutoResponse(commands.Cog):
                             await message.channel.send(reference=message, embed=installmods, view=view)
                             print(f"Northstar mods embed reply sent")
                 self.last_time = datetime.datetime.utcnow()
+            self.last_channel = message.channel.id
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(AutoResponse(bot))
