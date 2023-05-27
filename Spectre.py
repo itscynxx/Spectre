@@ -21,7 +21,7 @@ config = util.JsonHandler.load_json("config.json")
 
 bot = commands.Bot(
     intents=INTENTS,
-    command_prefix="$",
+    command_prefix=config["prefix"],
     owner_id=config["admin"]
 )
 
