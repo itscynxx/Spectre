@@ -53,6 +53,7 @@ class AutoResponse(commands.Cog):
         time_diff = (datetime.datetime.utcnow() - self.last_time).total_seconds()
 
         if time_diff < config["cooldowntime"]:
+            print(f"Tried to send message while on cooldown! Didn't send message!")
             return
         else:
             if replycheck() == True:
