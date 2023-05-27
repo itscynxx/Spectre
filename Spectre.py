@@ -9,11 +9,22 @@ COGS = ("cogs.AutoResponse", "cogs.GlobalReplies", "cogs.UserReplies", "cogs.Ins
 INTENTS = discord.Intents.default()
 INTENTS.message_content = True
 
+config = util.JsonHandler.load_json("config.json")
+
+# Config docs
+# {
+#     "admin": <admin id>,
+#     "cooldowntime": <cooldown seconds>, 
+#     "noreplylist": <name of list.json>,
+#     "allowedchannels": <name of list.json>
+# }
+
 bot = commands.Bot(
     intents=INTENTS,
-    command_prefix="$",
-    owner_id=502519988423229460
+    command_prefix=config["prefix"],
+    owner_id=config["admin"]
 )
+
 
 class aclient(discord.Client):
     def __init__(self):

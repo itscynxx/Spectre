@@ -1,3 +1,4 @@
+import datetime
 import discord
 from discord.ext import commands
 import util.JsonHandler
@@ -18,16 +19,15 @@ responses = {
     "installmods": ["help installing mods", "help getting mods"]
 }
 log_data = {}
-
+config = util.JsonHandler.load_json("config.json")
 
 class SimpleView(discord.ui.View):
     @discord.ui.button(label="Disable automatic bot replies", style=discord.ButtonStyle.red)
     async def disable(self, interaction: discord.Interaction, button: discord.ui.Button):
         log_data[str(interaction.user.id)] = {}
-        log_data[str(interaction.user.id)] = 1
+        log_data[str(interaction.user.id)] = False
         util.JsonHandler.save_users(log_data)
         await interaction.response.send_message("Successfully disabled automatic replies!", ephemeral=True)
-        util.JsonHandler.save_users(log_data)
             
     @discord.ui.button(label="Enable automatic bot replies", style=discord.ButtonStyle.success)
     async def enable(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -43,34 +43,42 @@ class SimpleView(discord.ui.View):
 class AutoResponse(commands.Cog):
     def __init__(self, bot :commands.Bot) -> None:
         self.bot = bot
-
+        self.last_time = datetime.datetime.utcfromtimestamp(0)
+    
     @commands.Cog.listener()
     async def on_message(self, message):
         view = SimpleView()
-        data = util.JsonHandler.load_users()
+        users = util.JsonHandler.load_users()
+        channel = util.JsonHandler.load_channels()
+        time_diff = (datetime.datetime.utcnow() - self.last_time).total_seconds()
 
-        if replycheck() == True:
-            if str(message.author.id) in data:
-                if str(message.author.id) == False:
-                    return
+        if time_diff < config["cooldowntime"]:
+            print(f"Tried to send message while on cooldown! Didn't send message!")
+            return
+        else:
+            if replycheck() == True:
+                if str(message.author.id) in users:
+                    if str(message.author.id) == False:
+                        return
                 
-                if str(message.channel.id) in data:
-                    # Should stop all bot messages
-                    if message.author.bot:
-                        print(f"Stopped my stupid ass from making an infinite message loop :3")
-                    return
-            
-                elif any(x in message.content.lower() for x in responses["install"]):
-                    await message.channel.send(reference=message, embed=installing, view=view)
-                    print(f"Installing Northstar embed reply sent")
+                if str(message.channel.id) in channel:
+                        # Should stop all bot messages
+                        if message.author.bot:
+                            # print(f"Stopped my stupid ass from making an infinite message loop :3")
+                            return
+                
+                        elif any(x in message.content.lower() for x in responses["install"]):
+                            await message.channel.send(reference=message, embed=installing, view=view)
+                            print(f"Installing Northstar embed reply sent")
 
-                elif any(x in message.content.lower() for x in responses["help"]):
-                    await message.channel.send(reference=message, embed=help, view=view)
-                    print(f"Northstar Help embed reply sent")
-            
-                elif any(x in message.content.lower() for x in responses["installmods"]):
-                    await message.channel.send(reference=message, embed=installmods, view=view)
-                    print(f"Northstar mods embed reply sent")
-            
+                        elif any(x in message.content.lower() for x in responses["help"]):
+                            await message.channel.send(reference=message, embed=help, view=view)
+                            print(f"Northstar Help embed reply sent")
+                    
+                        elif any(x in message.content.lower() for x in responses["installmods"]):
+                            await message.channel.send(reference=message, embed=installmods, view=view)
+                            print(f"Northstar mods embed reply sent")
+                self.last_time = datetime.datetime.utcnow()
+
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(AutoResponse(bot))
