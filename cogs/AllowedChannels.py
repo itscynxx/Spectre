@@ -3,7 +3,7 @@ import os
 import util.JsonHandler
 from discord.ext import commands
 
-log_data = []
+log_data = {}
 
 class AllowedChannels(commands.Cog):
     def __init__(self, bot :commands.Bot) -> None:

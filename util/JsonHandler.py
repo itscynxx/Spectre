@@ -1,30 +1,41 @@
 import json
 import os
 
-noreplylist = "noreplyusers.json"
+
 
 def init_json():
     if os.path.isfile(noreplylist) == False:
         new_json(noreplylist)
+    if os.path.isfile(allowedchannels) == False:
+        new_json(allowedchannels)
 
 def new_json(name):
     fp = open(name, "w")
     fp.write("{}")
     fp.close()
 
-def load_users():
-    with open("noreplyusers.json", 'r') as f:
-        users = json.load(f)
-    return users
+def save_json(file,data):
+    with open(file, 'w') as f:
+        json.dump(data, f, indent=4)
+
+def load_json(file):
+    with open(file, 'r') as f:
+        data = json.load(f)
+    return data
     
 def save_users(data):
-    with open('noreplyusers.json', 'w') as f:
-        json.dump(data, f, indent=4)
-def load_channels():
-    with open("allowedchannels.json", 'r') as f:
-        channels = json.load(f)
-    return channels
+    save_json(noreplylist, data)
+
+def load_users():
+    return load_json(noreplylist)
 
 def save_channels(data):
-    with open('allowedchannels.json', 'w') as f:
-        json.dump(data, f, indent=4)
+    save_json(allowedchannels, data)
+
+def load_channels():
+    return load_json(allowedchannels)
+
+
+config = load_json("config.json")
+noreplylist = config["noreplylist"]
+allowedchannels = config["allowedchannels"]
