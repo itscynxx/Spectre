@@ -5,7 +5,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 
-COGS = ("cogs.AutoResponse", "cogs.GlobalReplies", "cogs.UserReplies", "cogs.InstallChannelEmbed")
+COGS = ("cogs.AutoResponse", "cogs.GlobalReplies", "cogs.UserReplies", "cogs.InstallChannelEmbed", "cogs.AllowedChannels")
 INTENTS = discord.Intents.default()
 INTENTS.message_content = True
 
