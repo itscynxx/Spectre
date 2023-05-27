@@ -53,22 +53,24 @@ class AutoResponse(commands.Cog):
             if str(message.author.id) in data:
                 if str(message.author.id) == False:
                     return
-            # Should stop all bot messages
-            if message.author.bot:
-                print(f"Stopped my stupid ass from making an infinite message loop :3")
-                return
+                
+                if str(message.channel.id) in data:
+                    # Should stop all bot messages
+                    if message.author.bot:
+                        print(f"Stopped my stupid ass from making an infinite message loop :3")
+                    return
             
-            elif any(x in message.content.lower() for x in responses["install"]):
-                await message.channel.send(reference=message, embed=installing, view=view)
-                print(f"Installing Northstar embed reply sent")
+                elif any(x in message.content.lower() for x in responses["install"]):
+                    await message.channel.send(reference=message, embed=installing, view=view)
+                    print(f"Installing Northstar embed reply sent")
 
-            elif any(x in message.content.lower() for x in responses["help"]):
-                await message.channel.send(reference=message, embed=help, view=view)
-                print(f"Northstar Help embed reply sent")
+                elif any(x in message.content.lower() for x in responses["help"]):
+                    await message.channel.send(reference=message, embed=help, view=view)
+                    print(f"Northstar Help embed reply sent")
             
-            elif any(x in message.content.lower() for x in responses["installmods"]):
-                await message.channel.send(reference=message, embed=installmods, view=view)
-                print(f"Northstar mods embed reply sent")
+                elif any(x in message.content.lower() for x in responses["installmods"]):
+                    await message.channel.send(reference=message, embed=installmods, view=view)
+                    print(f"Northstar mods embed reply sent")
             
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(AutoResponse(bot))
