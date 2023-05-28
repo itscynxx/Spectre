@@ -25,22 +25,21 @@ log_data = {}
 config = util.JsonHandler.load_json("config.json")
 
 class SimpleView(discord.ui.View):
-    @discord.ui.button(label="Disable automatic bot replies", style=discord.ButtonStyle.red)
+    @discord.ui.button(label="Toggle automatic bot replies", style=discord.ButtonStyle.success)
     async def disable(self, interaction: discord.Interaction, button: discord.ui.Button):
-        log_data[str(interaction.user.id)] = {}
-        log_data[str(interaction.user.id)] = False
-        util.JsonHandler.save_users(log_data)
-        await interaction.response.send_message("Successfully disabled automatic replies!", ephemeral=True)
-            
-    @discord.ui.button(label="Enable automatic bot replies", style=discord.ButtonStyle.success)
-    async def enable(self, interaction: discord.Interaction, button: discord.ui.Button):
         data = util.JsonHandler.load_users()
-        for key in data:
-            if str(interaction.user.id) in data:
+        if str(interaction.user.id) in data:
+            for key in data:
                 del data[str(interaction.user.id)]
                 await interaction.response.send_message("Successfully enabled automatic replies!", ephemeral=True)
                 break
-        util.JsonHandler.save_users(data)
+            util.JsonHandler.save_users(data)
+
+        else:
+            log_data[str(interaction.user.id)] = {}
+            log_data[str(interaction.user.id)] = False
+            util.JsonHandler.save_users(log_data)
+            await interaction.response.send_message("Successfully disabled automatic replies!", ephemeral=True)
 
         
 class AutoResponse(commands.Cog):
