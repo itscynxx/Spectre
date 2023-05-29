@@ -18,7 +18,7 @@ playeraccount = discord.Embed(description="I noticed that you may have asked for
 responses = {  
     "install":       ["installing northstar", "install northstar", "get northstar", "download northstar", "downloading northstar"],
     "help":          ["how do i fix", "help with Northsrtar", "somebody help", "anybody help", "how fix", "how to fix", "vtol error", "viper error", "flightcore error"],
-    "installmods":   ["help installing mods", "help getting mods"]
+    "installmods":   ["help installing mods", "help getting mods"],
     "playeraccount": ["couldnt find player account", "couldn't find player account", "player account not found"]
 }
 log_data = {}
