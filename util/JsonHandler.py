@@ -23,12 +23,21 @@ def load_json(file):
         data = json.load(f)
     return data
     
+# Functions for saving users toggling their replies to JSON
 def save_users(data):
     save_json(noreplylist, data)
 
 def load_users():
     return load_json(noreplylist)
 
+# Functions for saving me toggling user abilities to toggle replies to JSON
+def save_neverusers(data):
+    save_json(neverreplylist, data)
+
+def load_neverusers():
+    return load_json(neverreplylist)
+
+# Functions for saving allowed channels to JSON
 def save_channels(data):
     save_json(allowedchannels, data)
 
@@ -38,4 +47,5 @@ def load_channels():
 
 config = load_json("config.json")
 noreplylist = config["noreplylist"]
+neverreplylist = config["neverreplylist"]
 allowedchannels = config["allowedchannels"]
