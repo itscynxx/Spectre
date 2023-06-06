@@ -3,5 +3,6 @@
     "prefix": "$",
     "cooldowntime": 5, 
     "noreplylist": "noreplyusers.json",
+    "neverreplylist": "neverreplyusers.json",
     "allowedchannels": "allowedchannels.json"
 }
