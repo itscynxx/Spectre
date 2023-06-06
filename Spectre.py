@@ -10,12 +10,14 @@ INTENTS = discord.Intents.default()
 INTENTS.message_content = True
 
 config = util.JsonHandler.load_json("config.json")
+log_data = {}
 
 # Config docs
 # {
 #     "admin": <admin id>,
 #     "cooldowntime": <cooldown seconds>, 
 #     "noreplylist": <name of list.json>,
+#     "neverreplylist": <name of neverreplylist.json>
 #     "allowedchannels": <name of list.json>
 # }
 
@@ -62,6 +64,37 @@ async def reload(ctx):
         for cog in COGS:
             await bot.reload_extension(cog)
         print('Reloaded cogs successfully!')
+    else:
+        await ctx.send("You don't have permission to use this command!", ephemeral=True)
+
+# Disable a user's automatic replies if they're being naughty :D
+@bot.hybrid_command(description="Disables reply toggling for selected user. Owner only.")
+@app_commands.describe(user = "The user to disable reply toggling for")
+async def disablereplytoggle(ctx, user: discord.Member):
+    if ctx.author.id == bot.owner_id:
+        data = util.JsonHandler.load_neverusers()
+        log_data[str(user.id)] = "off"
+        # This isn't very efficient but it works (I think)!
+        util.JsonHandler.save_neverusers(log_data)
+        await ctx.send(f"Successfully disabled reply toggling for {user}", ephemeral=True)
+    else:
+        await ctx.send("You don't have permission to use this command!", ephemeral=True)
+
+# Enables giving users control over automatic responses for them again
+@bot.hybrid_command(description="Enables reply toggling for selected user. Owner only.")
+@app_commands.describe(user = "The user to enable reply toggling for")
+async def enablereplytoggle(ctx, user: discord.Member):
+    if ctx.author.id == bot.owner_id:
+        data = util.JsonHandler.load_neverusers()
+
+        for key in data:
+            if str(user.id) in data:
+                del data[str(user.id)]
+                # This isn't very efficient but it works (I think)!
+                await ctx.send(f"Successfully disabled reply toggling for {user}", ephemeral=True)
+                break
+        
+        util.JsonHandler.save_neverusers(data)
     else:
         await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
