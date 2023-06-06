@@ -8,6 +8,8 @@ def init_json():
         new_json(noreplylist)
     if os.path.isfile(allowedchannels) == False:
         new_json(allowedchannels)
+    if os.path.isfile(neverreplylist) == False:
+        new_json(neverreplylist)
 
 def new_json(name):
     fp = open(name, "w")
