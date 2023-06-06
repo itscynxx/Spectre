@@ -52,6 +52,7 @@ class AutoResponse(commands.Cog):
     async def on_message(self, message):
         view = SimpleView()
         users = util.JsonHandler.load_users()
+        neverusers = util.JsonHandler.load_neverusers()
         channel = util.JsonHandler.load_channels()
         time_diff = (datetime.datetime.utcnow() - self.last_time).total_seconds()
 
@@ -63,7 +64,9 @@ class AutoResponse(commands.Cog):
         else:
             if replycheck() == True:
                 if str(message.author.id) in users:
-                    if str(message.author.id) == False:
+                        return
+                    
+                if str(message.author.id) in neverusers:
                         return
                 
                 if str(message.channel.id) in channel:
