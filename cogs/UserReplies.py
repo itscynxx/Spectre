@@ -13,8 +13,8 @@ class UserReplies(commands.Cog):
     @commands.hybrid_command(name='disablereplies', description='Disables replies for the user who uses the command')
     async def disablereplies(self, ctx):
         data = util.JsonHandler.load_users()
-        log_data[str(ctx.author.id)] = {}
-        log_data[str(ctx.author.id)] = False
+        log_data[str(ctx.author.id)] = "off"
+        # This isn't very efficient but it works (I think)!
         util.JsonHandler.save_users(log_data)
         await ctx.send("Successfully disabled me automatically replying to your messages!", ephemeral=True)
 
