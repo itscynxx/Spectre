@@ -11,7 +11,6 @@ INTENTS = discord.Intents.default()
 INTENTS.message_content = True
 
 config = util.JsonHandler.load_json("config.json")
-log_data = {}
 
 # Config docs
 # {
@@ -59,25 +58,31 @@ async def sync(ctx):
     else:
         await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
-@bot.hybrid_command(name='reload', description='Owner only')
-async def reload(ctx):
-    if ctx.author.id == bot.owner_id:
-        for cog in COGS:
-            await bot.reload_extension(cog)
-        print('Reloaded cogs successfully!')
-    else:
-        await ctx.send("You don't have permission to use this command!", ephemeral=True)
-
 # Disable a user's automatic replies if they're being naughty :D
 @bot.hybrid_command(description="Disables reply toggling for selected user. Owner only.")
 @app_commands.describe(user = "The user to disable reply toggling for")
 async def disablereplytoggle(ctx, user: discord.Member):
     if ctx.author.id == bot.owner_id:
         data = util.JsonHandler.load_neverusers()
-        log_data[str(user.id)] = "off"
+        data[str(user.id)] = "off"
         # This isn't very efficient but it works (I think)!
-        util.JsonHandler.save_neverusers(log_data)
+        util.JsonHandler.save_neverusers(data)
         await ctx.send(f"Successfully disabled reply toggling for {user}", ephemeral=True)
+    else:
+        await ctx.send("You don't have permission to use this command!", ephemeral=True)
+
+# Enables giving users control over automatic responses for them again
+@bot.hybrid_command(description="Enables reply toggling for selected user. Owner only.")
+@app_commands.describe(user = "The user to enable reply toggling for")
+async def enablereplytoggle(ctx, user: discord.Member):
+    if ctx.author.id == bot.owner_id:
+        data = util.JsonHandler.load_neverusers() 
+
+        if str(user.id) in data:
+            del data[str(user.id)]
+
+        util.JsonHandler.save_neverusers(data) 
+        await ctx.send(f"Successfully enabled reply toggling for {user}", ephemeral=True)
     else:
         await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
