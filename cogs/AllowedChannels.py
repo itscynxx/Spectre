@@ -12,7 +12,7 @@ class AllowedChannels(commands.Cog):
     async def allowchannel(self, ctx):
         if ctx.author.id == self.bot.owner_id:
             data = util.JsonHandler.load_channels()
-            data[str(ctx.channel.id)] = Enabled
+            data[str(ctx.channel.id)] = "Enabled"
             util.JsonHandler.save_channels(data)
             await ctx.send("Successfully enabled automatic replies in this channel!")
 
