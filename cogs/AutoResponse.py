@@ -21,25 +21,24 @@ responses = {
     "installmods":   ["help installing mods", "help getting mods"],
     "playeraccount": ["couldnt find player account", "couldn't find player account", "player account not found"]
 }
-log_data = {}
+
 config = util.JsonHandler.load_json("config.json")
 
 class SimpleView(discord.ui.View):
     @discord.ui.button(label="Toggle automatic bot replies", style=discord.ButtonStyle.success)
     async def disable(self, interaction: discord.Interaction, button: discord.ui.Button):
         data = util.JsonHandler.load_users()
+
         if str(interaction.user.id) in data:
             for key in data:
                 del data[str(interaction.user.id)]
                 await interaction.response.send_message("Successfully enabled automatic replies!", ephemeral=True)
                 break
-            util.JsonHandler.save_users(data)
-
         else:
-            log_data[str(interaction.user.id)] = {}
-            log_data[str(interaction.user.id)] = False
-            util.JsonHandler.save_users(log_data)
+            data[str(interaction.user.id)] = "off"
             await interaction.response.send_message("Successfully disabled automatic replies!", ephemeral=True)
+
+        util.JsonHandler.save_users(data)
 
         
 class AutoResponse(commands.Cog):
