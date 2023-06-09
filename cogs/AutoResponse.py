@@ -85,6 +85,7 @@ class AutoResponse(commands.Cog):
                     
                         elif any(x in message.content.lower() for x in responses["installmods"]):
                             await message.channel.send(reference=message, embed=installmods, view=view)
+                            await message.channel.send("https://cdn.discordapp.com/attachments/942391932137668618/1069362595192127578/instruction_bruh.png")
                             print(f"Northstar mods embed reply sent")
                             
                         elif any(x in message.content.lower() for x in responses["playeraccount"]):
