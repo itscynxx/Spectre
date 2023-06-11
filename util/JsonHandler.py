@@ -4,12 +4,23 @@ import os
 
 
 def init_json():
+    # Automatically create files for user data 
+
+        
     if os.path.isfile(noreplylist) == False:
+
         new_json(noreplylist)
     if os.path.isfile(allowedchannels) == False:
         new_json(allowedchannels)
     if os.path.isfile(neverreplylist) == False:
         new_json(neverreplylist)
+    
+    # Automatically create files for ticket data
+
+    if os.path.isdir(openticketlist) == False:
+        new_json(openticketlist)
+    if os.path.isdir(openticketusers) == False:
+        new_json(openticketusers)
 
 def new_json(name):
     fp = open(name, "w")
@@ -46,8 +57,28 @@ def save_channels(data):
 def load_channels():
     return load_json(allowedchannels)
 
+# Functions for saving currently opened tickets
+def save_ticket(data):
+    save_json(openticketlist, data)
+
+def load_ticket():
+    return load_json(openticketlist)
+
+def save_ticketuser(data):
+    save_json(openticketusers, data)
+
+def load_ticketuser():
+    return load_json(openticketusers)
 
 config = load_json("config.json")
+
+# Config loading for user data
+usersdata = config["usersdata"]
 noreplylist = config["noreplylist"]
 neverreplylist = config["neverreplylist"]
 allowedchannels = config["allowedchannels"]
+
+# Config loading for tickets data
+ticketsdata = config["ticketsdata"]
+openticketlist = config["openticketlist"]
+openticketusers = config["openticketusers"]
