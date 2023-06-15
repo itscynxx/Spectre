@@ -27,6 +27,7 @@ bot = commands.Bot(
     owner_id=config["admin"]
 )
 
+bot.remove_command("help")
 
 class aclient(discord.Client):
     def __init__(self):
@@ -95,6 +96,24 @@ async def enablereplytoggle(ctx, user: discord.Member):
         await ctx.send(f"Successfully enabled reply toggling for {user}", ephemeral=True)
     else:
         await ctx.send("You don't have permission to use this command!", ephemeral=True)
+
+# Set the status for the bot
+@bot.hybrid_command(description="Set the status of the bot. Owner only")
+async def setstatus(ctx, status: str):
+    if ctx.author.id == bot.owner_id:
+        await bot.change_presence(activity=discord.Game(name=f"{status}"))
+        await ctx.send(f"Set bot status to `Playing {status}`", ephemeral=True)
+    else:
+        await ctx.send("You don't have permission to use this command!", ephemeral=True)
+
+@bot.hybrid_command(description="Display information for using the bot")
+async def help(ctx):
+    helpembed = discord.Embed(title="Spectre", description="Spectre is a bot created by Cyn (aka cooldudepugs) with major help from H0L0. Its purpose is to redirect users to get help easier when sending messages in public channels trying to get help. The list below is of commands for the bot that all users have access to.", color=0x6495ED)
+    helpembed.add_field(name="disablereplies", value="Disables the bot replying to the person who used the command", inline=False)
+    helpembed.add_field(name="enablereplies", value="Enables the bot replying to the person who uesd the command", inline=False)
+    helpembed.add_field(name="replystatus", value="Sends an embed about if the bot has automatic replies on at all. Also shows if the user has their replies or ability to control their replies disabled.\n\nYou can view a full list of the commands on the [GitHub repo's wiki](https://github.com/CooldudePUGS/Spectre/wiki)", inline=False)
+    await ctx.send(embed=helpembed)
+
 
 load_dotenv()
 util.JsonHandler.init_json()
