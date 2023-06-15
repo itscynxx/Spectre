@@ -12,15 +12,25 @@ help = discord.Embed(description="I noticed that you may have asked for help. Pl
 installmods = discord.Embed(description="I noticed that you may have asked for help installing mods. You can do this automatically or manually.", color=0x5D3FD3)
 installmods.add_field(name="Automatic mod installation", value="Simply use a mod manager and navigate to the mods browser to automatically find and install mods.")
 installmods.add_field(name="Manual mod installation", value="See the image sent below for help installing mods manually. If it's hard to read, click into it, and hit `Open in browser`, then follow the image guide.")
-installmods.add_field(name="\u200b", value="If I'm being accidentally triggered or annoying, please ping @cooldudepugs#4318", inline=False)
+installmods.add_field(name="\u200b", value="If I'm being accidentally triggered or annoying, please disable replies with the button below or ping @cooldudepugs#4318", inline=False)
 # Embed for automatically replying to mentions of "Couldn't find player account"
 playeraccount = discord.Embed(description="I noticed that you may have asked for help regarding the \"Couldn't find player account\" error. Please read the [wiki section for this issue](https://r2northstar.gitbook.io/r2northstar-wiki/installing-northstar/troubleshooting#player-not-found-invalid-master-server-token) to solve the error. \n\nIf I'm being accidentally triggered or annoying, please disable replies with the button below or ping @cooldudepugs#4318", color=0x5D3FD3)
+# Embed for automatically replying to mentions of "What is Northstar?"
+northstarInfo = discord.Embed(title="I noticed you may have asked a question about what Northstar is.", description="Northstar is a mod loader for Titanfall 2 with a focus on community server hosting and support for modding to replace models, sounds, textures, or even add new gamemodes. To install, you can check and read the [installation channel](https://discordapp.com/channels/920776187884732556/922662496588943430).\n\nIf I'm being accidentally triggered or annoying, please disable replies with the button below or ping @cooldudepugs#4318")
+# Embed for automatically replying to potential questions of script compilation errors- either temporary entirely or temporary version for the ModSettings merge into Northstar 1.15.0
+compError = discord.Embed(title="I noticed you may have asked for help regarding \"Script Compilation Error\" issues.", description="This error generally means that something has gone wrong with one of your mods and either\n1. You\'re missing a dependency for a mod you\'ve installed (note: if you're using a mod manager, that should auto install them for you) or\n2. A mod you have is conflicting with another mod you have installed.", color=0x5D3FD3)
+compError.add_field(name="Recently, ModSettings has been merged into Northstar. This means it\'s a part of normal Northstar, and having the mod version of it from now on will cause issues.", value="This will probably cause a lot of this specific issue for the next little while, so make sure to remove it if you haven\'t already\n\nIf I'm being accidentally triggered or annoying, please disable replies with the button below or ping @cooldudepugs#4318")
+# Embed for automatically replying to potential mentions of "Authentication Failed", meant to be enabled when the Master Server Northstar is run on is down
+msdown = discord.Embed(title="I noticed you may have mentioned the error \"Authentication Failed\".", description="Currently, the Master server Northstar operates on is down. This means that currently you can't connect and aren't alone in having the error. Please wait for the master server to come back up and continue to check [the annoucements channel] for more updates.\n\nIf I'm being accidentally triggered or annoying, please disable replies with the button below or ping @cooldudepugs#4318", color=0x5D3FD3)
 
 responses = {  
-    "install":       ["installing northstar", "install northstar", "get northstar", "download northstar", "downloading northstar"],
-    "help":          ["how do i fix", "help with Northsrtar", "somebody help", "anybody help", "how fix", "how to fix", "vtol error", "viper error", "flightcore error"],
-    "installmods":   ["help installing mods", "help getting mods"],
-    "playeraccount": ["couldnt find player account", "couldn't find player account", "player account not found"]
+    "install":         ["installing northstar", "install northstar", "get northstar", "download northstar", "downloading northstar"],
+    "help":            ["how do i fix", "help with Northsrtar", "somebody help", "anybody help", "how fix", "how to fix", "vtol error", "viper error", "flightcore error"],
+    "installmods":     ["help installing mods", "help getting mods"],
+    "playeraccount":   ["couldnt find player account", "couldn't find player account", "player account not found"],
+    "whatisNorthstar": ["what is northstar"],
+    "ScriptCompError": ["script compilation error", "compilation error", "compile error"],
+    "msdown":          ["authentication failed", "cant join"]
 }
 
 config = util.JsonHandler.load_json("config.json")
@@ -41,12 +51,32 @@ class SimpleView(discord.ui.View):
 
         util.JsonHandler.save_users(data)
 
+def EnabledCheck():
+    return msdown
         
 class AutoResponse(commands.Cog):
     def __init__(self, bot :commands.Bot) -> None:
         self.bot = bot
         self.last_time = datetime.datetime.utcfromtimestamp(0)
         self.last_channel = 0
+
+    @commands.hybrid_command(description="Enables the message for master server being down")
+    async def msdownmessageon(ctx):
+        if ctx.author.id == bot.owner_id:
+            global msdown
+            msdown = True
+            await ctx.send("Enabled the message for cases where Masterserver is down!")
+        else:
+            await ctx.send("You don't have permission to use this command!", ephemeral=True)
+
+    @commands.hybrid_command(description="Disables the message for master server being down")
+    async def msdownmessageoff(ctx):
+        if ctx.author.id == bot.owner_id:
+            global msdown
+            msdown = False
+            await ctx.send("Disabled the message for cases where Masterserver is down!")
+        else:
+            await ctx.send("You don't have permission to use this command", ephemeral=True)
     
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -75,18 +105,32 @@ class AutoResponse(commands.Cog):
                             # print(f"Stopped my stupid ass from making an infinite message loop :3")
                             return
                 
+                        elif any(x in message.content.lower() for x in responses["whatisNorthstar"]):
+                            await message.channel.send(reference=message, embed=northstarInfo, view=view)
+                            print(f"Northstar info embed reply sent")
+
+                        elif any(x in message.content.lower() for x in responses["msdown"]):
+                            if EnabledCheck() == True:
+                                await message.channel.send(reference=message, embed=msdown, view=view)
+                            else:
+                                return
+
                         elif any(x in message.content.lower() for x in responses["install"]):
                             await message.channel.send(reference=message, embed=installing, view=view)
                             print(f"Installing Northstar embed reply sent")
 
+                        elif any(x in message.content.lower() for x in responses["ScriptCompError"]):
+                            await message.channel.send(reference=message, embed=compError, view=view)
+                            print(f"Comp Error embed reply sent")
+
                         elif any(x in message.content.lower() for x in responses["help"]):
                             await message.channel.send(reference=message, embed=help, view=view)
-                            print(f"Northstar Help embed reply sent")
+                            print(f"Northstar help embed reply sent")
                     
                         elif any(x in message.content.lower() for x in responses["installmods"]):
                             await message.channel.send(reference=message, embed=installmods, view=view)
                             await message.channel.send("https://cdn.discordapp.com/attachments/942391932137668618/1069362595192127578/instruction_bruh.png")
-                            print(f"Northstar mods embed reply sent")
+                            print(f"Northstar mods installing embed reply sent")
                             
                         elif any(x in message.content.lower() for x in responses["playeraccount"]):
                             await message.channel.send(reference=message, embed=playeraccount, view=view)
