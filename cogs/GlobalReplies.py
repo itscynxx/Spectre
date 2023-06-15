@@ -1,5 +1,6 @@
 import discord
 import os
+import util.JsonHandler
 from discord.ext import commands
 
 replies = True
@@ -10,7 +11,11 @@ repliesoff = discord.Embed(title="Automatic bot replies set to ***OFF***", color
 
 # Embeds about the reply status of the bot
 replystatusenabled = discord.Embed(title="Automatic bot replies are currently enabled", color=0x6495ED)
-replystatusdisabled = discord.Embed(title="Automatic bot replies are currently disabled", color=0x6495ED)
+replystatusdisabled = discord.Embed(title="Automatic bot replies are currently disabled", color=0xDC143C)
+
+# Embeds for showing if users have their replies off or I've removed their ability to toggle replies while showing the global status of replies
+replystatusenabledUserTogglesDisabled = discord.Embed(title="Automatic bot replies are currently enabled", description="_But_ the user of this command has their ability to control their automatic replies disabled", color=0x6495ED)
+replystatusenabledUserRepliesDisabled = discord.Embed(title="Automatic bot replies are currently enabled", description="_But_ the user of this command has automatic replies disabled", color=0x6495ED)
 
 
 def replycheck():
@@ -20,9 +25,9 @@ class GlobalReplies(commands.Cog):
     def __init__(self, bot :commands.Bot) -> None:
         self.bot = bot
     
-    # Stops replies across all servers
+    # Disables replies across all servers
     @commands.hybrid_command(description="Globally disables Spectre replying to messages")
-    async def stop(self, ctx):
+    async def globaldisable(self, ctx):
         if ctx.author.id == self.bot.owner_id:
             global replies
             replies = False
@@ -31,9 +36,9 @@ class GlobalReplies(commands.Cog):
         else:
             await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
-    # Starts replies across all servers
+    # Enables replies across all servers
     @commands.hybrid_command(description="Globally enables Spectre replying to messages")
-    async def start(self, ctx):
+    async def globalenable(self, ctx):
         if ctx.author.id == self.bot.owner_id:
             global replies
             replies = True
@@ -45,12 +50,18 @@ class GlobalReplies(commands.Cog):
     # Displays the current status of replies across all servers
     @commands.hybrid_command(description="Displays if bot replies are on or off")
     async def replystatus(self, ctx):
+        data = util.JsonHandler.load_users()
+        data2 = util.JsonHandler.load_neverusers()
+
         if replies == True:
-            await ctx.send(embed=replystatusenabled)
+            if str(ctx.author.id) in data2:
+                await ctx.send(embed=replystatusenabledUserTogglesDisabled)
+            elif str(ctx.author.id) in data:
+                await ctx.send(embed=replystatusenabledUserRepliesDisabled)
+            else:
+                await ctx.send(embed=replystatusenabled)
         elif replies == False:
             await ctx.send(embed=replystatusdisabled)
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(GlobalReplies(bot))
-
-    

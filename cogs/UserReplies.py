@@ -13,7 +13,7 @@ class UserReplies(commands.Cog):
         data = util.JsonHandler.load_users()
 
         if str(ctx.author.id) in data:
-            await ctx. send("You already have automatic replies disabled!", ephemeral=True)
+            await ctx.send("You already have automatic replies disabled!", ephemeral=True)
             
         else:    
             data[str(ctx.author.id)] = "off"
