@@ -21,7 +21,7 @@ northstarInfo = discord.Embed(title="I noticed you may have asked a question abo
 compError = discord.Embed(title="I noticed you may have asked for help regarding \"Script Compilation Error\" issues.", description="This error generally means that something has gone wrong with one of your mods and either\n1. You\'re missing a dependency for a mod you\'ve installed (note: if you're using a mod manager, that should auto install them for you) or\n2. A mod you have is conflicting with another mod you have installed.", color=0x5D3FD3)
 compError.add_field(name="Recently, ModSettings has been merged into Northstar. This means it\'s a part of normal Northstar, and having the mod version of it from now on will cause issues.", value="This will probably cause a lot of this specific issue for the next little while, so make sure to remove it if you haven\'t already\n\nIf I'm being accidentally triggered or annoying, please disable replies with the button below or ping @cooldudepugs#4318")
 # Embed for automatically replying to potential mentions of "Authentication Failed", meant to be enabled when the Master Server Northstar is run on is down
-msdown = discord.Embed(title="I noticed you may have mentioned the error \"Authentication Failed\".", description="Currently, the Master server Northstar operates on is down. This means that currently you can't connect and aren't alone in having the error. Please wait for the master server to come back up and continue to check [the annoucements channel] for more updates.\n\nIf I'm being accidentally triggered or annoying, please disable replies with the button below or ping @cooldudepugs#4318", color=0x5D3FD3)
+msdownembed = discord.Embed(title="I noticed you may have mentioned the error \"Authentication Failed\".", description="Currently, the Master server Northstar operates on is down. This means that currently you can't connect and aren't alone in having the error. Please wait for the master server to come back up and continue to check [the annoucements channel](https://discord.com/channels/920776187884732556/920780605132800080) for more updates.\n\nIf I'm being accidentally triggered or annoying, please disable replies with the button below or ping @cooldudepugs#4318", color=0x5D3FD3)
 
 responses = {  
     "install":         ["installing northstar", "install northstar", "get northstar", "download northstar", "downloading northstar"],
@@ -51,6 +51,8 @@ class SimpleView(discord.ui.View):
 
         util.JsonHandler.save_users(data)
 
+msdown = False
+
 def EnabledCheck():
     return msdown
         
@@ -61,8 +63,8 @@ class AutoResponse(commands.Cog):
         self.last_channel = 0
 
     @commands.hybrid_command(description="Enables the message for master server being down")
-    async def msdownmessageon(ctx):
-        if ctx.author.id == bot.owner_id:
+    async def msdownmessageon(self, ctx):
+        if ctx.author.id == self.bot.owner_id:
             global msdown
             msdown = True
             await ctx.send("Enabled the message for cases where Masterserver is down!")
@@ -70,8 +72,8 @@ class AutoResponse(commands.Cog):
             await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
     @commands.hybrid_command(description="Disables the message for master server being down")
-    async def msdownmessageoff(ctx):
-        if ctx.author.id == bot.owner_id:
+    async def msdownmessageoff(self, ctx):
+        if ctx.author.id == self.bot.owner_id:
             global msdown
             msdown = False
             await ctx.send("Disabled the message for cases where Masterserver is down!")
@@ -111,7 +113,7 @@ class AutoResponse(commands.Cog):
 
                         elif any(x in message.content.lower() for x in responses["msdown"]):
                             if EnabledCheck() == True:
-                                await message.channel.send(reference=message, embed=msdown, view=view)
+                                await message.channel.send(reference=message, embed=msdownembed, view=view)
                             else:
                                 return
 
