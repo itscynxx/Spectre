@@ -19,6 +19,7 @@ config = util.JsonHandler.load_json("config.json")
 #     "noreplylist": <name of list.json>,
 #     "neverreplylist": <name of neverreplylist.json>
 #     "allowedchannels": <name of list.json>
+#     "allowedusers": <name of alloweduserslist.json>
 # }
 
 bot = commands.Bot(
@@ -50,30 +51,40 @@ async def setup_hook() -> None:
 client = aclient()
 
 # Slash command to update commands
-@bot.hybrid_command(name='sync', description='Owner only')
+@bot.hybrid_command(name='sync', description='Syncs the bot\'s commands. Allowed users only.')
 async def sync(ctx):
-    if ctx.author.id == bot.owner_id:
+    allowed_users = util.JsonHandler.load_allowed_users()
+
+    if str(ctx.author.id) in allowed_users or ctx.author.id == bot.owner_id:
         await bot.tree.sync()
         print('Commands synced successfully!')
         await ctx.send('Commands synced successfully!')
     else:
         await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
+
+
 # Slash command to reload cogs
-@bot.hybrid_command(name='reload', description='Owner only')
+@bot.hybrid_command(name='reload', description='Reloads the bot\'s cogs. Allowed users only.')
 async def reload(ctx):
-    if ctx.author.id == bot.owner_id:
+    allowed_users = util.JsonHandler.load_allowed_users()
+
+    if str(ctx.author.id) in allowed_users:
         for cog in COGS:
             await bot.reload_extension(cog)
         print('Reloaded cogs successfully!')
     else:
         await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
+
+
 # Disable a user's automatic replies if they're being naughty :D
-@bot.hybrid_command(description="Disables reply toggling for selected user. Owner only.")
+@bot.hybrid_command(description="Disables reply toggling for selected user. Allowed users only.")
 @app_commands.describe(user = "The user to disable reply toggling for")
 async def disablereplytoggle(ctx, user: discord.Member):
-    if ctx.author.id == bot.owner_id:
+    allowed_users = util.JsonHandler.load_allowed_users()
+
+    if str(ctx.author.id) in allowed_users:
         data = util.JsonHandler.load_neverusers()
         data[str(user.id)] = "off"
         # This isn't very efficient but it works (I think)!
@@ -83,10 +94,12 @@ async def disablereplytoggle(ctx, user: discord.Member):
         await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
 # Enables giving users control over automatic responses for them again
-@bot.hybrid_command(description="Enables reply toggling for selected user. Owner only.")
+@bot.hybrid_command(description="Enables reply toggling for selected user. Allowed users only.")
 @app_commands.describe(user = "The user to enable reply toggling for")
 async def enablereplytoggle(ctx, user: discord.Member):
-    if ctx.author.id == bot.owner_id:
+    allowed_users = util.JsonHandler.load_allowed_users()
+
+    if str(ctx.author.id) in allowed_users:
         data = util.JsonHandler.load_neverusers() 
 
         if str(user.id) in data:
@@ -97,14 +110,47 @@ async def enablereplytoggle(ctx, user: discord.Member):
     else:
         await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
+
+
 # Set the status for the bot
-@bot.hybrid_command(description="Set the status of the bot. Owner only")
+@bot.hybrid_command(description="Set the status of the bot. Allowed users only.")
 async def setstatus(ctx, status: str):
-    if ctx.author.id == bot.owner_id:
-        await bot.change_presence(activity=discord.Game(name=f"{status}"))
-        await ctx.send(f"Set bot status to `Playing {status}`", ephemeral=True)
+    allowed_users = util.JsonHandler.load_allowed_users()
+
+    if str(ctx.author.id) in allowed_users:
+        await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f"{status}"))
+        await ctx.send(f"Set bot status to `Listening to {status}`", ephemeral=True)
     else:
         await ctx.send("You don't have permission to use this command!", ephemeral=True)
+
+
+
+@bot.hybrid_command(description="Add a user to the allowed users list. Owner only")
+async def enablerusercommands(ctx, user: discord.Member):
+    if ctx.author.id == bot.owner_id:
+        allowed_users = util.JsonHandler.load_allowed_users()
+
+        allowed_users[str(user.id)] = "allowed"
+        util.JsonHandler.save_allowed_users(allowed_users)
+        await ctx.send(f"Successfully allowed {user} to use bot commands", ephemeral=True)
+    else:
+        await ctx.send("You don't have permission to use this command!", ephemeral=True)
+
+@bot.hybrid_command(description="Removes a user from the allowed users list. Owner only.")
+@app_commands.describe(user = "The user to enable reply toggling for")
+async def disableusercommands(ctx, user: discord.Member):
+    if ctx.author.id == bot.owner_id:
+        allowed_users = util.JsonHandler.load_allowed_users()
+
+        if str(user.id) in allowed_users:
+            del allowed_users[str(user.id)]
+
+        util.JsonHandler.save_allowed_users(allowed_users) 
+        await ctx.send(f"Successfully removed {user}'s ability to use bot commands", ephemeral=True)
+    else:
+        await ctx.send("You don't have permission to use this command!", ephemeral=True)
+
+
 
 @bot.hybrid_command(description="Display information for using the bot")
 async def help(ctx):
