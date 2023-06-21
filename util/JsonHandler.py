@@ -10,6 +10,8 @@ def init_json():
         new_json(allowedchannels)
     if os.path.isfile(neverreplylist) == False:
         new_json(neverreplylist)
+    if os.path.isfile(allowedusers) == False:
+        new_json(allowedusers)
 
 def new_json(name):
     fp = open(name, "w")
@@ -46,8 +48,15 @@ def save_channels(data):
 def load_channels():
     return load_json(allowedchannels)
 
+def save_allowed_users(data):
+    save_json(allowedusers, data)
+
+def load_allowed_users():
+    return load_json(allowedusers)
+
 
 config = load_json("config.json")
 noreplylist = config["noreplylist"]
 neverreplylist = config["neverreplylist"]
 allowedchannels = config["allowedchannels"]
+allowedusers = config["allowedusers"]
