@@ -3,6 +3,7 @@ import os
 import util.JsonHandler
 from discord.ext import commands
 
+
 class UserReplies(commands.Cog):
     def __init__(self, bot :commands.Bot) -> None:
         self.bot = bot
