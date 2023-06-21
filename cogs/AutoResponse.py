@@ -4,6 +4,7 @@ from discord.ext import commands
 import util.JsonHandler
 from cogs.GlobalReplies import replycheck
 
+
 # Embed for automatically replying to potential questions about installing Northstar
 installing = discord.Embed(description="I noticed that you may have asked for help installing Northstar. Please read the [installation channel](https://discordapp.com/channels/920776187884732556/922662496588943430) for ways to install Northstar.\n\nIf I'm being accidentally triggered or annoying, please disable replies with the button below or ping @cooldudepugs#4318", color=0x5D3FD3)
 # Embed for automatically replying to potential questions about help for Northstar
@@ -28,7 +29,7 @@ responses = {
     "help":            ["how do i fix", "help with Northsrtar", "somebody help", "anybody help", "how fix", "how to fix", "vtol error", "viper error", "flightcore error"],
     "installmods":     ["help installing mods", "help getting mods"],
     "playeraccount":   ["couldnt find player account", "couldn't find player account", "player account not found"],
-    "whatisNorthstar": ["what is northstar"],
+    "whatisNorthstar": ["what is northstar", "what's northstar"],
     "ScriptCompError": ["script compilation error", "compilation error", "compile error"],
     "msdown":          ["authentication failed", "cant join"]
 }
@@ -62,18 +63,46 @@ class AutoResponse(commands.Cog):
         self.last_time = datetime.datetime.utcfromtimestamp(0)
         self.last_channel = 0
 
-    @commands.hybrid_command(description="Enables the message for master server being down")
+    @commands.hybrid_command(description="Enables the message for master server being down. Allowed users only.")
     async def msdownmessageon(self, ctx):
-        if ctx.author.id == self.bot.owner_id:
+        allowed_users = util.JsonHandler.load_allowed_users()
+
+        if str(ctx.author.id) in allowed_users:
             global msdown
             msdown = True
             await ctx.send("Enabled the message for cases where Masterserver is down!")
         else:
             await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
-    @commands.hybrid_command(description="Disables the message for master server being down")
+    @commands.hybrid_command(description="Display what phrases trigger Spectre's auto reply. Allowed users only.")
+    async def autoreplytriggers(self, ctx):
+        allowed_users = util.JsonHandler.load_allowed_users()
+
+        triggers = discord.Embed(title="Phrases that trigger Spectre's auto reply:")
+        triggers.add_field(name="Installation help", value='"installing northstar", "install northstar", "get northstar", "download northstar", "downloading northstar"\n', inline=False)
+        triggers.add_field(name="", value="\u200b", inline=False)
+        triggers.add_field(name="General help", value='"how do i fix", "help with Northsrtar", "somebody help", "anybody help", "how fix", "how to fix", "vtol error", "viper error", "flightcore error"\n', inline=False)
+        triggers.add_field(name="", value="\u200b", inline=False)
+        triggers.add_field(name="Mod installing help", value='"help installing mods", "help getting mods"\n', inline=False)
+        triggers.add_field(name="", value="\u200b", inline=False)
+        triggers.add_field(name="Player account not found help", value='"couldnt find player account", "couldn\'t find player account", "player account not found"\n', inline=False)
+        triggers.add_field(name="", value="\u200b", inline=False)
+        triggers.add_field(name="What is Northstar messages", value='"what is northstar", "what\'s northstar"\n', inline=False)
+        triggers.add_field(name="", value="\u200b", inline=False)
+        triggers.add_field(name="Script compilation errors (Note: This is mostly likely temporary, or at the very least will change soon especially as the Mod Settings mention will most likely only stay for a week or two)", value='"script compilation error", "compilation error", "compile error"\n', inline=False)
+        triggers.add_field(name="", value="\u200b", inline=False)
+        triggers.add_field(name="Master Server down messages (Note: This auto reply must be enabled by using `/enablemsdownmessage` and should only be enabled when MS is actually down!)", value='"authentication failed", "cant join"\n', inline=False)
+
+        if str(ctx.author.id) in allowed_users:
+            await ctx.send(embed=triggers, ephemeral=True)
+        else:
+            await ctx.send("You don't have permission to use this command!", ephemeral=True)
+
+    @commands.hybrid_command(description="Disables the message for master server being down. Allowed users only.")
     async def msdownmessageoff(self, ctx):
-        if ctx.author.id == self.bot.owner_id:
+        allowed_users = util.JsonHandler.load_allowed_users()
+
+        if str(ctx.author.id) in allowed_users:
             global msdown
             msdown = False
             await ctx.send("Disabled the message for cases where Masterserver is down!")
@@ -137,6 +166,10 @@ class AutoResponse(commands.Cog):
                         elif any(x in message.content.lower() for x in responses["playeraccount"]):
                             await message.channel.send(reference=message, embed=playeraccount, view=view)
                             print(f"Couldn\'t find player account embed reply sent")
+                        
+                        elif "<@&1120176677033611334>" in message.content.lower():
+                            await message.delete()
+                            await message.channel.send("fuck")
                             
                 self.last_time = datetime.datetime.utcnow()
             self.last_channel = message.channel.id
