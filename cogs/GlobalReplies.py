@@ -3,6 +3,7 @@ import os
 import util.JsonHandler
 from discord.ext import commands
 
+
 replies = True
 
 # Embeds about global enabling/denying automatic replies for the bot
@@ -26,9 +27,11 @@ class GlobalReplies(commands.Cog):
         self.bot = bot
     
     # Disables replies across all servers
-    @commands.hybrid_command(description="Globally disables Spectre replying to messages")
+    @commands.hybrid_command(description="Globally disables Spectre replying to messages. Allowed users only.")
     async def globaldisable(self, ctx):
-        if ctx.author.id == self.bot.owner_id:
+        allowed_users = util.JsonHandler.load_allowed_users()
+
+        if str(ctx.author.id) in allowed_users:
             global replies
             replies = False
             await ctx.send(embed=repliesoff)
@@ -37,9 +40,11 @@ class GlobalReplies(commands.Cog):
             await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
     # Enables replies across all servers
-    @commands.hybrid_command(description="Globally enables Spectre replying to messages")
+    @commands.hybrid_command(description="Globally enables Spectre replying to messages. Allowed users only.")
     async def globalenable(self, ctx):
-        if ctx.author.id == self.bot.owner_id:
+        allowed_users = util.JsonHandler.load_allowed_users()
+
+        if str(ctx.author.id) in allowed_users:
             global replies
             replies = True
             await ctx.send(embed=replieson)
