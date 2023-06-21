@@ -4,5 +4,6 @@
     "cooldowntime": 5, 
     "noreplylist": "noreplyusers.json",
     "neverreplylist": "neverreplyusers.json",
-    "allowedchannels": "allowedchannels.json"
+    "allowedchannels": "allowedchannels.json",
+    "allowedusers": "allowedusers.json"
 }
