@@ -1,6 +1,8 @@
 import discord
 import os
+import util.JsonHandler
 from discord.ext import commands
+
 
 replies = True
 
@@ -23,9 +25,11 @@ class InstallationChannel(commands.Cog):
         self.bot = bot
 
     # Slash command to send the embeds for the installation channel
-    @commands.hybrid_command()
+    @commands.hybrid_command(description="Information for the #installation channel. Allowed users only.")
     async def installation(self, ctx): 
-        if ctx.author.id == self.bot.owner_id:
+        allowed_users = util.JsonHandler.load_allowed_users()
+
+        if str(ctx.author.id) in allowed_users:
             await ctx.channel.send(embed=helpembed)
             await ctx.channel.send(embed=manual)
             await ctx.channel.send(embed=installation)
