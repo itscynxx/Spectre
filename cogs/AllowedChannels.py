@@ -13,7 +13,7 @@ class AllowedChannels(commands.Cog):
 
         if str(ctx.author.id) in allowed_users:
             data = util.JsonHandler.load_channels()
-            data[str(ctx.channel.id)] = ""
+            data[str(ctx.channel.id)] = f"{ctx.guild.name} - {ctx.channel.name}"
             util.JsonHandler.save_channels(data)
             
             await ctx.send("Successfully enabled automatic replies in this channel!")
