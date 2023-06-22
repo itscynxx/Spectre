@@ -73,6 +73,7 @@ async def reload(ctx):
         for cog in COGS:
             await bot.reload_extension(cog)
         print('Reloaded cogs successfully!')
+        await ctx.send("Reloaded cogs succesfully!", ephemeral=True)
     else:
         await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
@@ -130,7 +131,7 @@ async def enablerusercommands(ctx, user: discord.Member):
     if ctx.author.id == bot.owner_id:
         allowed_users = util.JsonHandler.load_allowed_users()
 
-        allowed_users[str(user.id)] = "allowed"
+        allowed_users[str(user.id)] = f"{user}-Allowed"
         util.JsonHandler.save_allowed_users(allowed_users)
         await ctx.send(f"Successfully allowed {user} to use bot commands", ephemeral=True)
     else:
@@ -147,6 +148,27 @@ async def disableusercommands(ctx, user: discord.Member):
 
         util.JsonHandler.save_allowed_users(allowed_users) 
         await ctx.send(f"Successfully removed {user}'s ability to use bot commands", ephemeral=True)
+    else:
+        await ctx.send("You don't have permission to use this command!", ephemeral=True)
+
+@bot.hybrid_command(description="Lists the current users with permission to use higher level bot commands. Allowed users only.")
+async def permissionlist(ctx):
+    allowed_users = util.JsonHandler.load_allowed_users()
+    
+    if str(ctx.author.id) in allowed_users:
+        
+        listEmbed = discord.Embed(title="Allowed users", description="These users have access to (most) of Spectre's commands!", color=0xA020F0)
+        listEmbed.add_field(name="", value="\u200b")
+        
+        for user_id, value in allowed_users.items():
+            user = await bot.fetch_user(int(user_id))
+            
+            username = user.name
+            
+            listEmbed.add_field(name="", value=f"{username}", inline=False)
+        
+        await ctx.send(embed=listEmbed, ephemeral=True)
+    
     else:
         await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
