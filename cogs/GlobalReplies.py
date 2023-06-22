@@ -1,5 +1,4 @@
 import discord
-import os
 import util.JsonHandler
 from discord.ext import commands
 
@@ -55,13 +54,13 @@ class GlobalReplies(commands.Cog):
     # Displays the current status of replies across all servers
     @commands.hybrid_command(description="Displays if bot replies are on or off")
     async def replystatus(self, ctx):
-        data = util.JsonHandler.load_users()
-        data2 = util.JsonHandler.load_neverusers()
+        users = util.JsonHandler.load_users()
+        neverusers = util.JsonHandler.load_neverusers()
 
         if replies == True:
-            if str(ctx.author.id) in data2:
+            if str(ctx.author.id) in neverusers:
                 await ctx.send(embed=replystatusenabledUserTogglesDisabled)
-            elif str(ctx.author.id) in data:
+            elif str(ctx.author.id) in users:
                 await ctx.send(embed=replystatusenabledUserRepliesDisabled)
             else:
                 await ctx.send(embed=replystatusenabled)

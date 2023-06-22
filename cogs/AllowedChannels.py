@@ -1,5 +1,4 @@
 import discord
-import os
 import util.JsonHandler
 from discord.ext import commands
 
@@ -16,8 +15,8 @@ class AllowedChannels(commands.Cog):
             data = util.JsonHandler.load_channels()
             data[str(ctx.channel.id)] = "Enabled"
             util.JsonHandler.save_channels(data)
+            
             await ctx.send("Successfully enabled automatic replies in this channel!")
-        
         else:
             await ctx.send("You don't have permission to use this command", ephemeral=True)
 
@@ -30,10 +29,9 @@ class AllowedChannels(commands.Cog):
             
             if str(ctx.channel.id) in data:
                 del data[str(ctx.channel.id)]
+                
                 await ctx.send("Successfully disabled automatic replies in this channel!")
-
             util.JsonHandler.save_channels(data)
-        
         else:
             await ctx.send("You don't have permission to use this command", ephemeral=True)
 
