@@ -1,5 +1,4 @@
 import discord
-import os
 import util.JsonHandler
 from discord.ext import commands
 
@@ -26,7 +25,7 @@ class InstallationChannel(commands.Cog):
 
     # Slash command to send the embeds for the installation channel
     @commands.hybrid_command(description="Information for the #installation channel. Allowed users only.")
-    async def installation(self, ctx): 
+    async def installation(self, ctx): # Yes, this gives an "Interaction failed" error. This is intended. This is so only the embeds show and no "x person used slash command" text appears
         allowed_users = util.JsonHandler.load_allowed_users()
 
         if str(ctx.author.id) in allowed_users:
