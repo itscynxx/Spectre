@@ -30,19 +30,6 @@ bot = commands.Bot(
 
 bot.remove_command("help")
 
-class aclient(discord.Client):
-    def __init__(self):
-        super().__init__(intents=discord.Intents.default())
-        self.synced = False
-    
-    async def on_ready(self):
-        await self.wait_until_ready()
-        if not self.synced:
-            await bot.tree.sync
-            self.synced = True
-        # Very professional way to show that the bot is online :D
-        print('{self.user} is a bitch ass motherfucker. Oh, and shit\'s working.')
-
 @bot.event
 async def setup_hook() -> None:
     for cog in COGS:
@@ -90,7 +77,7 @@ async def disablereplytoggle(ctx, user: discord.Member):
         data[str(user.id)] = "off"
         # This isn't very efficient but it works (I think)!
         util.JsonHandler.save_neverusers(data)
-        await ctx.send(f"Successfully disabled reply toggling for {user}", ephemeral=True)
+        await ctx.send(f"Successfully disabled reply toggling for {user.name}!", ephemeral=True)
     else:
         await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
@@ -107,7 +94,7 @@ async def enablereplytoggle(ctx, user: discord.Member):
             del data[str(user.id)]
 
         util.JsonHandler.save_neverusers(data) 
-        await ctx.send(f"Successfully enabled reply toggling for {user}", ephemeral=True)
+        await ctx.send(f"Successfully enabled reply toggling for {user.name}!", ephemeral=True)
     else:
         await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
@@ -120,7 +107,7 @@ async def setstatus(ctx, status: str):
 
     if str(ctx.author.id) in allowed_users:
         await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=f"{status}"))
-        await ctx.send(f"Set bot status to `Listening to {status}`", ephemeral=True)
+        await ctx.send(f"Set bot status to `Listening to {status}`!", ephemeral=True)
     else:
         await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
@@ -131,9 +118,9 @@ async def enablerusercommands(ctx, user: discord.Member):
     if ctx.author.id == bot.owner_id:
         allowed_users = util.JsonHandler.load_allowed_users()
 
-        allowed_users[str(user.id)] = f"{user}-Allowed"
+        allowed_users[str(user.id)] = ""
         util.JsonHandler.save_allowed_users(allowed_users)
-        await ctx.send(f"Successfully allowed {user} to use bot commands", ephemeral=True)
+        await ctx.send(f"Successfully allowed {user.name} to use bot commands!", ephemeral=True)
     else:
         await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
@@ -147,7 +134,7 @@ async def disableusercommands(ctx, user: discord.Member):
             del allowed_users[str(user.id)]
 
         util.JsonHandler.save_allowed_users(allowed_users) 
-        await ctx.send(f"Successfully removed {user}'s ability to use bot commands", ephemeral=True)
+        await ctx.send(f"Successfully removed {user.name}'s ability to use bot commands!", ephemeral=True)
     else:
         await ctx.send("You don't have permission to use this command!", ephemeral=True)
 
@@ -162,10 +149,7 @@ async def permissionlist(ctx):
         
         for user_id, value in allowed_users.items():
             user = await bot.fetch_user(int(user_id))
-            
-            username = user.name
-            
-            listEmbed.add_field(name="", value=f"{username}", inline=False)
+            listEmbed.add_field(name="", value=f"{user.name}", inline=False)
         
         await ctx.send(embed=listEmbed, ephemeral=True)
     
