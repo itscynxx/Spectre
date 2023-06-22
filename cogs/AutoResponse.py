@@ -118,7 +118,7 @@ class AutoResponse(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, message):
-        view = SimpleView()
+        view = ToggleRepliesButton()
         users = util.JsonHandler.load_users()
         neverusers = util.JsonHandler.load_neverusers()
         enabledchannels = util.JsonHandler.load_channels()
