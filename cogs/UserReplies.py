@@ -16,7 +16,7 @@ class UserReplies(commands.Cog):
             await ctx.send("You already have automatic replies disabled!", ephemeral=True)
             
         else:    
-            data[str(ctx.author.id)] = "off"
+            data[str(ctx.author.id)] = f"{interaction.user.display_name}"
 
             util.JsonHandler.save_users(data)
             await ctx.send("Successfully disabled me automatically replying to your messages!", ephemeral=True)
