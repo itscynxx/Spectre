@@ -30,6 +30,13 @@ bot = commands.Bot(
 
 bot.remove_command("help")
 
+class aclient(discord.Client):
+    def __init__(self):
+        super().__init__(intents=discord.Intents.default())
+
+    async def on_ready(self):
+        await self.wait_until_ready()
+
 @bot.event
 async def setup_hook() -> None:
     for cog in COGS:
