@@ -53,7 +53,7 @@ class ToggleRepliesButton(discord.ui.View):
                 await interaction.response.send_message("Successfully enabled automatic replies!", ephemeral=True)
                 break
         else:
-            data[str(interaction.user.id)] = "off"
+            data[str(interaction.user.id)] = f"{interaction.user.display_name}"
             await interaction.response.send_message("Successfully disabled automatic replies!", ephemeral=True)
 
         util.JsonHandler.save_users(data)
