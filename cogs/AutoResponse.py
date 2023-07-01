@@ -72,29 +72,24 @@ class AutoResponse(commands.Cog):
         self.last_time = datetime.datetime.utcfromtimestamp(0)
         self.last_channel = 0
 
-            
+
     @commands.hybrid_command(description="Enables the message for the master server being down. Allowed users only.")
-    async def msdownmessageon(self, ctx):
+    async def togglemsdownreply(self, ctx):
         allowed_users = util.JsonHandler.load_allowed_users()
 
         if str(ctx.author.id) in allowed_users:
             global msdown
-            msdown = True
-            await ctx.send("Enabled the message for cases where master server is down!")
+            
+            if msdown == False:
+                msdown = True
+                await ctx.send("Enabled the message for cases where master server is down!")
+                
+            elif msdown == True:
+                msdown = False
+                await ctx.send("Disabled the message for cases where the master server is down!")
         else:
             await ctx.send("You don't have permission to use this command!", ephemeral=True)
             
-    @commands.hybrid_command(description="Disables the message for the master server being down. Allowed users only.")
-    async def msdownmessageoff(self, ctx):
-        allowed_users = util.JsonHandler.load_allowed_users()
-
-        if str(ctx.author.id) in allowed_users:
-            global msdown
-            msdown = False
-            await ctx.send("Disabled the message for cases where the master server is down!")
-        else:
-            await ctx.send("You don't have permission to use this command", ephemeral=True)
-    
     @commands.Cog.listener()
     async def on_message(self, message):
         view = ToggleRepliesButton()
@@ -125,7 +120,7 @@ class AutoResponse(commands.Cog):
                             await message.channel.send(reference=message, embed=northstarInfo, view=view)
                             print(f"Northstar info embed reply sent")
                             
-                        elif re.search("player.account", message.content.lower()):
+                        elif re.search("player.*account", message.content.lower()):
                             await message.channel.send(reference=message, embed=playeraccount, view=view)
                             print(f"Couldn\'t find player account embed reply sent")
                         
@@ -133,13 +128,13 @@ class AutoResponse(commands.Cog):
                             await message.channel.send(reference=message, embed=controller, view=view)
                             print("Controller embed reply sent")
                             
-                        elif re.search("authentication.failed", message.content.lower()) or re.search("cant.*join", message.content.lower()):
+                        elif re.search("authentication.*failed", message.content.lower()) or re.search("cant.*join", message.content.lower()):
                             if EnabledCheck() == True:
                                 await message.channel.send(reference=message, embed=msdownembed, view=view)
                             else:
                                 return
 
-                        elif re.search("install.northstar", message.content.lower()):
+                        elif re.search("install.*northstar", message.content.lower()):
                             await message.channel.send(reference=message, embed=installing, view=view)
                             print(f"Installing Northstar embed reply sent")
 
@@ -151,16 +146,16 @@ class AutoResponse(commands.Cog):
                             await message.channel.send(reference=message, embed=managerhelp, view=view)
                             print(f"Mod manager help embed reply sent")
 
-                        elif re.search("anybody.help", message.content.lower()): 
+                        elif re.search("anybody.*help", message.content.lower()): 
                             await message.channel.send(reference=message, embed=help, view=view)
                             print(f"Northstar help embed reply sent")
                     
-                        elif re.search("install.mods", message.content.lower()):
+                        elif re.search("install.*mods", message.content.lower()):
                             await message.channel.send(reference=message, embed=installmods, view=view)
                             await message.channel.send("https://cdn.discordapp.com/attachments/942391932137668618/1069362595192127578/instruction_bruh.png")
                             print(f"Northstar mods installing embed reply sent")
                             
-                        
+                            
                 self.last_time = datetime.datetime.utcnow()
             self.last_channel = message.channel.id
 
