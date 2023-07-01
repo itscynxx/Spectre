@@ -12,6 +12,8 @@ def init_json():
         new_json(neverreplylist)
     if os.path.isfile(allowedusers) == False:
         new_json(allowedusers)
+    if os.path.isfile(roles) == False:
+        new_json(roles)
 
 def new_json(name):
     fp = open(name, "w")
@@ -60,3 +62,4 @@ noreplylist = config["noreplylist"]
 neverreplylist = config["neverreplylist"]
 allowedchannels = config["allowedchannels"]
 allowedusers = config["allowedusers"]
+roles = config["roles"]

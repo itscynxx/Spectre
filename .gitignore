@@ -3,3 +3,6 @@ util/__pycache__
 cogs/__pycache__
 noreplyusers.json
 allowedchannels.json
+allowedusers.json
+neverreplyusers.json
+roles.json

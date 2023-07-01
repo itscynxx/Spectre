@@ -1,6 +1,7 @@
 import discord
 import os
 import util.JsonHandler
+import util.Roles
 from discord.ext import commands
 from discord import app_commands
 from dotenv import load_dotenv
@@ -172,6 +173,10 @@ async def help(ctx):
     helpembed.add_field(name="enablereplies", value="Enables the bot replying to the person who uesd the command", inline=False)
     helpembed.add_field(name="replystatus", value="Sends an embed about if the bot has automatic replies on at all. Also shows if the user has their replies or ability to control their replies disabled.\n\nYou can view a full list of the commands on the [GitHub repo's wiki](https://github.com/CooldudePUGS/Spectre/wiki)", inline=False)
     await ctx.send(embed=helpembed)
+
+@bot.hybrid_command(description="Roles POW")
+async def roles(ctx):
+    await ctx.send(str(util.Roles.isModerator(ctx)))
 
 
 load_dotenv()

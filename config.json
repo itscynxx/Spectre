@@ -5,5 +5,6 @@
     "noreplylist": "noreplyusers.json",
     "neverreplylist": "neverreplyusers.json",
     "allowedchannels": "allowedchannels.json",
-    "allowedusers": "allowedusers.json"
+    "allowedusers": "allowedusers.json",
+    "roles": "roles.json"
 }
