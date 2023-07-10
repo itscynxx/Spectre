@@ -9,12 +9,6 @@ class LogReading(commands.Cog):
     intents = discord.Intents.default()
     intents.messages = True
     intents.message_content = True
-
-
-    @commands.hybrid_command()
-    async def ping(self, ctx, arg):
-        await ctx.send("pong")
-
     
     @commands.Cog.listener()
     async def on_message(self, message):
