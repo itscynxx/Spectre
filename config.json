@@ -1,6 +1,6 @@
 {
-    "admin": 614928598528294932,
-    "prefix": "%",
+    "admin": ,
+    "prefix": "",
     "cooldowntime": 5, 
     "noreplylist": "noreplyusers.json",
     "neverreplylist": "neverreplyusers.json",
