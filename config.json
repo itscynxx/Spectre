@@ -2,8 +2,8 @@
     "admin": 502519988423229460,
     "prefix": "$",
     "cooldowntime": 5, 
-    "noreplylist": "noreplyusers.json",
-    "neverreplylist": "neverreplyusers.json",
-    "allowedchannels": "allowedchannels.json",
-    "allowedusers": "allowedusers.json"
+    "noreplylist": "data/noreplyusers.json",
+    "neverreplylist": "data/neverreplyusers.json",
+    "allowedchannels": "data/allowedchannels.json",
+    "allowedusers": "data/allowedusers.json"
 }
