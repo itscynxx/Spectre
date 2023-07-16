@@ -1,5 +1,7 @@
 .env
 util/__pycache__
 cogs/__pycache__
-noreplyusers.json
-allowedchannels.json
+data/noreplyusers.json
+data/allowedchannels.json
+data/allowedusers.json
+data/neverreplyusers.json
