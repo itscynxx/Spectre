@@ -17,12 +17,13 @@ def decodetext(text, text_to_filter, text_to_filter2):
             new_text = new_text + i + "\n"
     return new_text
 
-
+  
 class LogReading(commands.Cog):
 
     intents = discord.Intents.default()
     intents.messages = True
     intents.message_content = True
+
 
     @commands.hybrid_command()
     async def setupconfig(self, ctx):
@@ -39,6 +40,7 @@ class LogReading(commands.Cog):
          else:
             print("config.json already exists")
 
+            
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.bot:
@@ -51,6 +53,7 @@ class LogReading(commands.Cog):
                     print("found nslog in the file")
                     reading_text = await message.attachments[0].read()
                     try:
+                      
                         cooltext = decodetext(reading_text, "Loading mod", "Loaded mod")
                         with open("cogs/JsonConfig/config.json", "r") as f:
                             config = json.load(f)
@@ -77,9 +80,5 @@ class LogReading(commands.Cog):
 
 
 
-
-
-
 async def setup(bot: commands.Bot) -> None:
         await bot.add_cog(LogReading(bot))
-
