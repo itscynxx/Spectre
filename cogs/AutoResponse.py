@@ -40,11 +40,6 @@ ea = discord.Embed(title="I noticed you may have asked for help regarding the \"
 ea.add_field(name="\u200b", value="If I'm being accidentally triggered or annoying, please disable replies with the button below or ping @cooldudepugs", inline=False)
 
 config = util.JsonHandler.load_json("config.json")
-
-#msdown = False
-
-#def EnabledCheck():
-#    return msdown
         
 class AutoResponse(commands.Cog):
     def __init__(self, bot :commands.Bot) -> None:
@@ -52,24 +47,6 @@ class AutoResponse(commands.Cog):
         self.last_time = datetime.datetime.utcfromtimestamp(0)
         self.last_channel = 0
 
-
-#    @commands.hybrid_command(description="Enables the message for the master server being down. Allowed users only.")
-#    async def togglemsdownreply(self, ctx):
-#        allowed_users = util.JsonHandler.load_allowed_users()
-#
-#        if str(ctx.author.id) in allowed_users:
-#            global msdown
-#            
-#            if msdown == False:
-#                msdown = True
-#                await ctx.send("Enabled the message for cases where master server is down!")
-#                
-#            elif msdown == True:
-#                msdown = False
-#                await ctx.send("Disabled the message for cases where the master server is down!")
-#        else:
-#            await ctx.send("You don't have permission to use this command!", ephemeral=True)
-            
     @commands.Cog.listener()
     async def on_message(self, message):
         users = util.JsonHandler.load_users()
