@@ -201,7 +201,7 @@ async def price(ctx):
     final_price = data["1237970"]["data"]["price_overview"]["final_formatted"]
     
     if sale_percent != 0:
-        message = f"Titanfall 2 is **ON SALE for {str(sale_percent)}% OFF**!\nStandard Price: **{standard_price}**\nSale Price: **{final_price}**\n<https://store.steampowered.com/app/1237970/Titanfall_2/>)"
+        message = f"Titanfall 2 is **ON SALE for {str(sale_percent)}% OFF**!\nStandard Price: **{standard_price}**\nSale Price: **{final_price}**\n<https://store.steampowered.com/app/1237970/Titanfall_2/>"
         await ctx.send(message)
         return
     else:
