@@ -111,7 +111,7 @@ class AutoResponse(commands.Cog):
                             image_match = next((key for key in text_image_map if re.search(key, message.content.lower())))
                             
                             if image_match:
-                                await message.channel.send(text_image_map[image_match])
+                                await message.channel.send(text_image_map[image_match], reference=message)
                                 print(f"Sent a {image_match}")
                             else:
                                 print("No matching keyword was found")     
