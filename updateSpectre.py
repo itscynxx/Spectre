@@ -7,7 +7,7 @@ if os.path.isfile("Spectre.py") == True:
     # Check that data exists. This could still error out if you don't have one of the other two, but if you don't, what are you doing
     if os.path.exists("data") == True:
         warning = input("Warning! Running this file updates Spectre, which will remove any local code changes you have! Do you wish to continue? [y]/[n] ")
-        if warning.lower() = "y"
+        if warning.lower() == "y":
             # Move to the parent directory (to create the new directory and later delete the old ones)
             os.chdir("../")
             os.rename("Spectre", "SpectreOld")
