@@ -186,9 +186,10 @@ async def help(ctx):
 @bot.hybrid_command(description="Display current price of Titanfall 2 on Steam")
 @app_commands.choices(region=[
     app_commands.Choice(name="US", value="US"),
-    app_commands.Choice(name="EU", value="FR"),
+    app_commands.Choice(name="EU", value="DE"),
     app_commands.Choice(name="CA", value="CA"),
     app_commands.Choice(name="AU", value="AU"),
+    app_commands.Choice(name="GB", value="GB"),
     ])
 async def price(ctx, region: typing.Optional[app_commands.Choice[str]]):
     # Initial request sent to the Steam API to make sure TF2 is on sale
