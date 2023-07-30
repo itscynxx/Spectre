@@ -214,7 +214,7 @@ class LogReading(commands.Cog):
 
 
                             if oldVersion == True:
-                                problem.add_field(name="Older Version", value=f"It seems that you're running an older version of Northstar. Updating may not solve your issue, but you should do it anyway. The current version is 1.17.3. Please update by using one of the methods in the [installation channel](https://discord.com/channels/920776187884732556/922662496588943430).", inline=False)
+                                problem.add_field(name="Older Version", value=f"It seems that you're running an older version of Northstar. Updating may not solve your issue, but you should do it anyway. The current version is {versionCheck()}. Please update by using one of the methods in the [installation channel](https://discord.com/channels/920776187884732556/922662496588943430).", inline=False)
                                 problem.add_field(name="\u200b", value="If you've already updated and are still seeing this, please check if you have a file called `northstar.dll` in `titanfall2/R2Northstar`. If you do, delete it, and try launching again.", inline=False)
 
                             
