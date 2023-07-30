@@ -1,6 +1,7 @@
 import discord
 import os
 import util.JsonHandler
+import requests
 from discord.ext import commands
 from discord import app_commands
 from dotenv import load_dotenv
@@ -10,6 +11,7 @@ import typing
 COGS = ("cogs.AutoResponse", "cogs.GlobalReplies", "cogs.UserReplies", "cogs.InstallChannelEmbed", "cogs.AllowedChannels", "cogs.LogReading")
 INTENTS = discord.Intents.default()
 INTENTS.message_content = True
+TF2_STORE_STEAMAPI_URL = "https://store.steampowered.com/api/appdetails?appids=1237970"
 
 config = util.JsonHandler.load_json("config.json")
 
@@ -180,6 +182,32 @@ async def help(ctx):
     helpembed.add_field(name="replystatus", value="Sends an embed about if the bot has automatic replies on at all. Also shows if the user has their replies or ability to control their replies disabled.\n\nYou can view a full list of the commands on the [GitHub repo's wiki](https://github.com/CooldudePUGS/Spectre/wiki)", inline=False)
     await ctx.send(embed=helpembed)
 
+@bot.hybrid_command(description="Display current price of Titanfall 2 on Steam")
+async def price(ctx):
+    try:
+        api_response = requests.get(TF2_STORE_STEAMAPI_URL)
+        
+        if api_response.status_code == 200:
+            data = api_response.json()
+        else:
+            await ctx.send(f"Steam API returned code: {api_response.status_code}")
+            return
+    except requests.exceptions.RequestException as err:
+        await ctx.send("Steam API Request failed")
+        return
+    
+    sale_percent = data["1237970"]["data"]["price_overview"]["discount_percent"]
+    standard_price = data["1237970"]["data"]["price_overview"]["initial_formatted"]
+    final_price = data["1237970"]["data"]["price_overview"]["final_formatted"]
+    
+    if sale_percent != 0:
+        message = f"Titanfall 2 is **ON SALE for {str(sale_percent)}% OFF**!\nStandard Price: **{standard_price}**\nSale Price: **{final_price}**\n<https://store.steampowered.com/app/1237970/Titanfall_2/>"
+        await ctx.send(message)
+        return
+    else:
+        message = f"Titanfall 2 is **not** on sale.\nCurrent Price: **{standard_price}**\n<https://store.steampowered.com/app/1237970/Titanfall_2/>"
+        await ctx.send(message)
+        return
 
 load_dotenv()
 util.JsonHandler.init_json()
