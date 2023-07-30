@@ -40,9 +40,32 @@ class PriceCheck(commands.Cog):
             base_url = "https://store.steampowered.com/app/1237970/Titanfall_2/?cc="
             
             if region is None:
-                response = requests.get(base_url + "US")
+                try:
+                    response = requests.get(base_url + "US")
+
+                    if response.status_code != 200:
+                        message = f"Web request returned code: {response.status_code}"
+                        await ctx.send(message)
+                        return
+                    
+                except requests.exceptions.RequestException as err:
+                    message = f"Web request failed: {err}"
+                    await ctx.send(message)
+                    return
+                
             else:
-                response = requests.get(base_url + region.value)
+                try:
+                    response = requests.get(base_url + region.value)
+                    
+                    if response.status_code != 200:
+                        message = f"Web request returned code: {response.status_code}"
+                        await ctx.send(message)
+                        return
+                    
+                except requests.exceptions.RequestException as err:
+                    message = f"Web request failed: {err}"
+                    await ctx.send(message)
+                    return
                 
             soup = BeautifulSoup(response.content, "lxml")
             final_price = soup.find("div", class_="discount_final_price")
@@ -58,12 +81,12 @@ class PriceCheck(commands.Cog):
                     response = requests.get(base_url + "US")
                     
                     if response.status_code != 200:
-                        message = f"Steam API returned code: {api_response.status_code}"
+                        message = f"Web request returned code: {response.status_code}"
                         await ctx.send(message)
                         return
                     
                 except requests.exceptions.RequestException as err:
-                    message = f"Steam API Request failed: {err}"
+                    message = f"Web request failed: {err}"
                     await ctx.send(message)
                     return
                         
@@ -72,12 +95,12 @@ class PriceCheck(commands.Cog):
                     response = requests.get(base_url + region.value)
                     
                     if response.status_code != 200:
-                        message = f"Steam API returned code: {api_response.status_code}"
+                        message = f"Web request returned code: {response.status_code}"
                         await ctx.send(message)
                         return
                     
                 except requests.exceptions.RequestException as err:
-                    message = f"Steam API Request failed: {err}"
+                    message = f"Web request failed: {err}"
                     await ctx.send(message)
                     return
                 
