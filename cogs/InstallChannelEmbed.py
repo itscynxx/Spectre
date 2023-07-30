@@ -2,7 +2,6 @@ import discord
 import util.JsonHandler
 from discord.ext import commands
 
-
 replies = True
 
 # Embeds for the installation channel - Help mention

@@ -2,8 +2,6 @@
 .venv
 util/__pycache__
 cogs/__pycache__
-Logs/nslog.txt
-data/noreplyusers.json
-data/allowedchannels.json
-data/allowedusers.json
-data/neverreplyusers.json
+data/
+Logs/
+__pycache__/

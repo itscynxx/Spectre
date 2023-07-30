@@ -3,6 +3,7 @@ from discord.ext import commands
 import util.JsonHandler
 from time import sleep
 import requests
+import os
 
 def decodetext(text, text_to_filter, text_to_filter2):
     filtered_bytes = text.replace(b'\x82', b'')
@@ -87,10 +88,9 @@ class LogReading(commands.Cog):
             
             if str(message.channel.id) in allowed_channels or str(message.channel.name).startswith("ticket"):
                 if message.attachments:
-                    filename = message.attachments[0].filename
-                    await message.attachments[0].save("Logs/nslogunparsed.txt")
+                    filename = message.attachments[0].filename  
                     if 'nslog' in filename and filename.endswith('.txt'): 
-
+                        await message.attachments[0].save("Logs/nslogunparsed.txt")
                         print("Found a log!")
                         with open(r"Logs/nslogunparsed.txt", "r") as file:
                             lines = file.readlines()
@@ -249,7 +249,8 @@ class LogReading(commands.Cog):
                             dmLog.clear_fields()
 
                             print("I didn't find any problems in the log!")
-            
+
+                        os.remove("Logs/nslogunparsed.txt")
             
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(LogReading(bot))

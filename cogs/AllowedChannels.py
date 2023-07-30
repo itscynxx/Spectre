@@ -1,4 +1,3 @@
-import discord
 import util.JsonHandler
 from discord.ext import commands
 
