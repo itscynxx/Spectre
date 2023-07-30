@@ -17,10 +17,18 @@ def decodetext(text, text_to_filter, text_to_filter2):
 
 
 def versionCheck():
-    checkVersion = requests.get("https://api.github.com/repos/R2Northstar/Northstar/releases/latest")
-    yo = checkVersion.text.split("https://github.com/R2Northstar/Northstar/releases/tag/v")[1]
-    nsVersion = yo.split('"')[0] 
-    return nsVersion
+    try:
+        gh_api_response = requests.get("https://api.github.com/repos/R2Northstar/Northstar/releases/latest")
+        if gh_api_response.status_code == 200:
+                gh_data = gh_api_response.json()
+        else:
+            print(f"Error code when retrieving GitHub API: {gh_api_response.status_code}")
+    except requests.exceptions.RequestException as err:
+        print(f"GitHub API request failed: {err}")
+        return None
+    
+    ns_current_version = gh_data["name"][1:] # This gets the version as the raw version number without the "v". So '1.7.3' vs 'v1.7.3'
+    return ns_current_version
    
 audioList = []
 modSplitList = []
