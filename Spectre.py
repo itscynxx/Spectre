@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import typing
 
 
-COGS = ("cogs.AutoResponse", "cogs.GlobalReplies", "cogs.UserReplies", "cogs.InstallChannelEmbed", "cogs.AllowedChannels")
+COGS = ("cogs.AutoResponse", "cogs.GlobalReplies", "cogs.UserReplies", "cogs.InstallChannelEmbed", "cogs.AllowedChannels", "cogs.LogReading", "cogs.PriceCheck")
 INTENTS = discord.Intents.default()
 INTENTS.message_content = True
 
@@ -179,7 +179,6 @@ async def help(ctx):
     helpembed.add_field(name="togglereplies", value="Toggles the bot replying to the person who used the command", inline=False)
     helpembed.add_field(name="replystatus", value="Sends an embed about if the bot has automatic replies on at all. Also shows if the user has their replies or ability to control their replies disabled.\n\nYou can view a full list of the commands on the [GitHub repo's wiki](https://github.com/CooldudePUGS/Spectre/wiki)", inline=False)
     await ctx.send(embed=helpembed)
-
 
 load_dotenv()
 util.JsonHandler.init_json()
