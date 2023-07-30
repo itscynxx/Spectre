@@ -10,7 +10,6 @@ import typing
 COGS = ("cogs.AutoResponse", "cogs.GlobalReplies", "cogs.UserReplies", "cogs.InstallChannelEmbed", "cogs.AllowedChannels", "cogs.LogReading", "cogs.PriceCheck")
 INTENTS = discord.Intents.default()
 INTENTS.message_content = True
-TF2_STORE_STEAMAPI_URL = "https://store.steampowered.com/api/appdetails?appids=1237970"
 
 config = util.JsonHandler.load_json("config.json")
 
