@@ -210,36 +210,25 @@ async def price(ctx, region: typing.Optional[app_commands.Choice[str]]):
     sale_percent = data["1237970"]["data"]["price_overview"]["discount_percent"]
 
     if sale_percent != 0:
-
         base_url = "https://store.steampowered.com/app/1237970/Titanfall_2/?cc="
-
         if region is None:
             response = requests.get(base_url + "US")
         else:
             response = requests.get(base_url + region.value)
-
         soup = BeautifulSoup(response.content, "lxml")
-
         final_price = soup.find("div", class_="discount_final_price")
         standard_price = soup.find("div", class_="discount_original_price")
-
-
         message = f"Titanfall 2 is **ON SALE for {str(sale_percent)}% OFF**!\nStandard Price: **{standard_price.text.strip()}**\nSale Price: **{final_price.text.strip()}**\n<https://store.steampowered.com/app/1237970/Titanfall_2/>"
         await ctx.send(message)
         return
     else:
-        
         base_url = "https://store.steampowered.com/app/1237970/Titanfall_2/?cc="
-
         if region is None:
             response = requests.get(base_url + "US")
         else:
             response = requests.get(base_url + region.value)
-
         soup = BeautifulSoup(response.content, "lxml")
-
         standard_price = soup.find("div", class_="game_purchase_price")
-        
         message = f"Titanfall 2 is **not** on sale.\nCurrent Price: **{standard_price.text.strip()}**\n<https://store.steampowered.com/app/1237970/Titanfall_2/>"
         await ctx.send(message)
         return
