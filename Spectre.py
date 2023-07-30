@@ -200,7 +200,8 @@ async def price(ctx, region: typing.Optional[app_commands.Choice[str]]):
         if api_response.status_code == 200:
             data = api_response.json()
         else:
-            await ctx.send(f"Steam API returned code: {api_response.status_code}")
+            message = f"Steam API returned code: {api_response.status_code}"
+            await ctx.send(message)
             return
     except requests.exceptions.RequestException as err:
         message = f"Steam API Request failed: {err}"
@@ -211,22 +212,49 @@ async def price(ctx, region: typing.Optional[app_commands.Choice[str]]):
 
     if sale_percent != 0:
         base_url = "https://store.steampowered.com/app/1237970/Titanfall_2/?cc="
+        
         if region is None:
             response = requests.get(base_url + "US")
         else:
             response = requests.get(base_url + region.value)
+            
         soup = BeautifulSoup(response.content, "lxml")
         final_price = soup.find("div", class_="discount_final_price")
         standard_price = soup.find("div", class_="discount_original_price")
         message = f"Titanfall 2 is **ON SALE for {str(sale_percent)}% OFF**!\nStandard Price: **{standard_price.text.strip()}**\nSale Price: **{final_price.text.strip()}**\n<https://store.steampowered.com/app/1237970/Titanfall_2/>"
         await ctx.send(message)
         return
+    
     else:
         base_url = "https://store.steampowered.com/app/1237970/Titanfall_2/?cc="
         if region is None:
-            response = requests.get(base_url + "US")
+            try:
+                response = requests.get(base_url + "US")
+                
+                if response.status_code != 200:
+                    message = f"Steam API returned code: {api_response.status_code}"
+                    await ctx.send(message)
+                    return
+                
+            except requests.exceptions.RequestException as err:
+                message = f"Steam API Request failed: {err}"
+                await ctx.send(message)
+                return
+                    
         else:
-            response = requests.get(base_url + region.value)
+            try:
+                response = requests.get(base_url + region.value)
+                
+                if response.status_code != 200:
+                    message = f"Steam API returned code: {api_response.status_code}"
+                    await ctx.send(message)
+                    return
+                
+            except requests.exceptions.RequestException as err:
+                message = f"Steam API Request failed: {err}"
+                await ctx.send(message)
+                return
+            
         soup = BeautifulSoup(response.content, "lxml")
         standard_price = soup.find("div", class_="game_purchase_price")
         message = f"Titanfall 2 is **not** on sale.\nCurrent Price: **{standard_price.text.strip()}**\n<https://store.steampowered.com/app/1237970/Titanfall_2/>"
