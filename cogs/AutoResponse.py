@@ -87,14 +87,8 @@ class AutoResponse(commands.Cog):
             "tank": "https://media.discordapp.net/attachments/942505193893945394/1130926682321191012/IMG_1307.png"
         }
         
-        regex_embed_map = {
-            "player.*account": playeraccount,
-            "Failed creating log file": ea,
-            "controller not working": controller,
-            "can.i.use.controller.*northstar": controller,
-            "authentication.*failed": msdownembed,
-            "cant.*join": msdownembed,
-        }
+        
+
 
         if not (time_diff > config["cooldowntime"] or message.channel.id != self.last_channel):
             self.last_channel = message.channel.id            
@@ -120,24 +114,34 @@ class AutoResponse(commands.Cog):
                                 await message.channel.send(text_image_map[image_match])
                                 print(f"Sent a {image_match}")
                             else:
-                                print("No matching keyword was found")
-                                
+                                print("No matching keyword was found")     
+
+                        elif re.search("player.*account", message.content.lower()):
+                            await message.channel.send(reference=message, embed=playeraccount)
+                            print(f"Couldn\'t find player account embed reply sent")
+
+                        elif re.search("Failed creating log file", message.content.lower()):
+                            await message.channel.send(reference=message, embed=ea)
+                            print("Default EA App directory embed reply sent")
+                        
+                        elif re.search("controller not working", message.content.lower()) or re.search("can.i.use.controller.*northstar", message.content.lower()):
+                            await message.channel.send(reference=message, embed=controller)
+                            print("Controller embed reply sent")
+                            
+                        elif re.search("authentication.*failed", message.content.lower()) or re.search("cant.*join", message.content.lower()):
+                            if EnabledCheck() == True:
+                                await message.channel.send(reference=message, embed=msdownembed)
+                            else:
+                                return
+
                         elif re.search("how|help", message.content.lower()) and re.search("install.northstar", message.content.lower()):
                             await message.channel.send(reference=message, embed=installing)
                             print(f"Installing Northstar embed reply sent")
-        
+                    
                         elif re.search("help|how", message.content.lower()) and re.search("titanfall|northstar", message.content.lower()) and re.search("install.*mods", message.content.lower()):
                             await message.channel.send(reference=message, embed=installmods)
                             await message.channel.send("https://cdn.discordapp.com/attachments/942391932137668618/1069362595192127578/instruction_bruh.png")
                             print(f"Northstar mods installing embed reply sent")
-                            
-                        else:
-                            message_match = next((key for key in regex_embed_map if re.search(key, message.content.lower())))
-                            if EnabledCheck() == True and message_match:
-                                await message.channel.send(reference=message, embed=regex_embed_map[message_match])
-                            else:
-                                return
-                                
                             
                             
                 self.last_time = datetime.datetime.utcnow()
