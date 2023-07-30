@@ -1,14 +1,8 @@
 import discord
-import os
 from discord.ext import commands
-import json
 import util.JsonHandler
-import re
 from time import sleep
 import requests
-from datetime import date
-
-today = date.today()
 
 def decodetext(text, text_to_filter, text_to_filter2):
     filtered_bytes = text.replace(b'\x82', b'')
@@ -21,6 +15,13 @@ def decodetext(text, text_to_filter, text_to_filter2):
             new_text = new_text + i + "\n"
     return new_text
 
+
+def versionCheck():
+    checkVersion = requests.get("https://api.github.com/repos/R2Northstar/Northstar/releases/latest")
+    yo = checkVersion.text.split("https://github.com/R2Northstar/Northstar/releases/tag/v")[1]
+    nsVersion = yo.split('"')[0] 
+    return nsVersion
+   
 audioList = []
 modSplitList = []
 
@@ -43,7 +44,6 @@ class LogReading(commands.Cog):
             await channel.typing()
             sleep(3)
             await channel.send("I'm a bot automatically replying to the ticket being opened. If you're having an issue with the Northstar client itself, please send a log so that I can try to automatically read it, or a human can read it better. You can do this by going to `Titanfall2/R2Northstar/logs` and sending the newset `nslog` you have. Make sure not to send an `nsdmp`, and that you send the newest one! The newest ones are near the bottom by default on windows.\n\nIf I don't automatically respond, please wait for a human to assist. If you're getting an error MESSAGE in game, you could also try typing that out here, as I automatically reply to some of those as well.")
-
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -81,21 +81,20 @@ class LogReading(commands.Cog):
                 if message.attachments:
                     filename = message.attachments[0].filename
                     await message.attachments[0].save("Logs/nslogunparsed.txt")
-                    if 'nslog' in filename and filename.endswith('.txt'):
+                    if 'nslog' in filename and filename.endswith('.txt'): 
+
                         print("Found a log!")
                         with open(r"Logs/nslogunparsed.txt", "r") as file:
                             lines = file.readlines()
+                            
+                   
                             for line in lines:
-                                
-                                #if "nslog2022" in filename:
-                                 #   await message.channel.send(refernce=message, embed=oldLog)
-
                                 if "NorthstarLauncher version:" in line:
                                     
                                     verSplit = line.split("version:")[1]
                                     if verSplit.strip() == "0.0.0.1+dev":
                                         return
-                                    elif verSplit.strip() < "1.17.3.0":
+                                    elif verSplit.strip() < versionCheck():
                                         dmLog.add_field(name="", value=f"Version: {verSplit.strip()}", inline=False)
                                         problemFound = True
                                         oldVersion = True
