@@ -1,8 +1,7 @@
-import discord, requests
-import util.JsonHandler
+import typing, requests
 from discord.ext import commands
 from bs4 import BeautifulSoup
-import typing
+from discord import app_commands
 
 TF2_STORE_STEAMAPI_URL = "https://store.steampowered.com/api/appdetails?appids=1237970"
 
@@ -18,7 +17,7 @@ class PriceCheck(commands.Cog):
         app_commands.Choice(name="AU", value="AU"),
         app_commands.Choice(name="GB", value="GB"),
         ])
-    async def price(ctx, region: typing.Optional[app_commands.Choice[str]]):
+    async def price(self, ctx, region: typing.Optional[app_commands.Choice[str]]):
         # Initial request sent to the Steam API to make sure TF2 is on sale
         # Price values are returned via bs4 scraping so we can have regional prices
         try:
