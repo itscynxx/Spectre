@@ -1,7 +1,7 @@
 import datetime
 import discord
 from discord.ext import commands
-import util.JsonHandler
+import util.JsonHandler, util.MasterStatus
 from cogs.GlobalReplies import replycheck
 import re
 
@@ -41,10 +41,10 @@ ea.add_field(name="\u200b", value="If I'm being accidentally triggered or annoyi
 
 config = util.JsonHandler.load_json("config.json")
 
-msdown = False
+#msdown = False
 
-def EnabledCheck():
-    return msdown
+#def EnabledCheck():
+#    return msdown
         
 class AutoResponse(commands.Cog):
     def __init__(self, bot :commands.Bot) -> None:
@@ -53,22 +53,22 @@ class AutoResponse(commands.Cog):
         self.last_channel = 0
 
 
-    @commands.hybrid_command(description="Enables the message for the master server being down. Allowed users only.")
-    async def togglemsdownreply(self, ctx):
-        allowed_users = util.JsonHandler.load_allowed_users()
-
-        if str(ctx.author.id) in allowed_users:
-            global msdown
-            
-            if msdown == False:
-                msdown = True
-                await ctx.send("Enabled the message for cases where master server is down!")
-                
-            elif msdown == True:
-                msdown = False
-                await ctx.send("Disabled the message for cases where the master server is down!")
-        else:
-            await ctx.send("You don't have permission to use this command!", ephemeral=True)
+#    @commands.hybrid_command(description="Enables the message for the master server being down. Allowed users only.")
+#    async def togglemsdownreply(self, ctx):
+#        allowed_users = util.JsonHandler.load_allowed_users()
+#
+#        if str(ctx.author.id) in allowed_users:
+#            global msdown
+#            
+#            if msdown == False:
+#                msdown = True
+#                await ctx.send("Enabled the message for cases where master server is down!")
+#                
+#            elif msdown == True:
+#                msdown = False
+#                await ctx.send("Disabled the message for cases where the master server is down!")
+#        else:
+#            await ctx.send("You don't have permission to use this command!", ephemeral=True)
             
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -129,7 +129,7 @@ class AutoResponse(commands.Cog):
                             print("Controller embed reply sent")
                             
                         elif re.search("authentication.*failed", message.content.lower()) or re.search("cant.*join", message.content.lower()):
-                            if EnabledCheck() == True:
+                            if util.MasterStatus.IsMasterDown() == True:
                                 await message.channel.send(reference=message, embed=msdownembed)
                             else:
                                 return
