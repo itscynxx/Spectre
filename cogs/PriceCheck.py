@@ -2,6 +2,7 @@ import discord, requests
 import util.JsonHandler
 from discord.ext import commands
 from bs4 import BeautifulSoup
+import typing
 
 TF2_STORE_STEAMAPI_URL = "https://store.steampowered.com/api/appdetails?appids=1237970"
 
