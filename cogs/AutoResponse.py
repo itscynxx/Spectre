@@ -1,7 +1,7 @@
 import datetime
 import discord
 from discord.ext import commands
-import util.JsonHandler
+import util.JsonHandler, util.MasterStatus
 from cogs.GlobalReplies import replycheck
 import re
 
@@ -40,11 +40,6 @@ ea = discord.Embed(title="I noticed you may have asked for help regarding the \"
 ea.add_field(name="\u200b", value="If I'm being accidentally triggered or annoying, please disable replies with the button below or ping @cooldudepugs", inline=False)
 
 config = util.JsonHandler.load_json("config.json")
-
-msdown = False
-
-def EnabledCheck():
-    return msdown
         
 class AutoResponse(commands.Cog):
     def __init__(self, bot :commands.Bot) -> None:
@@ -52,30 +47,24 @@ class AutoResponse(commands.Cog):
         self.last_time = datetime.datetime.utcfromtimestamp(0)
         self.last_channel = 0
 
-
-    @commands.hybrid_command(description="Enables the message for the master server being down. Allowed users only.")
-    async def togglemsdownreply(self, ctx):
-        allowed_users = util.JsonHandler.load_allowed_users()
-
-        if str(ctx.author.id) in allowed_users:
-            global msdown
-            
-            if msdown == False:
-                msdown = True
-                await ctx.send("Enabled the message for cases where master server is down!")
-                
-            elif msdown == True:
-                msdown = False
-                await ctx.send("Disabled the message for cases where the master server is down!")
-        else:
-            await ctx.send("You don't have permission to use this command!", ephemeral=True)
-            
     @commands.Cog.listener()
     async def on_message(self, message):
         users = util.JsonHandler.load_users()
         neverusers = util.JsonHandler.load_neverusers()
         enabledchannels = util.JsonHandler.load_channels()
         time_diff = (datetime.datetime.utcnow() - self.last_time).total_seconds()
+        
+        text_image_map = {
+            "bike": "https://cdn.discordapp.com/attachments/924051841631805461/1128540732358131753/image.png",
+            "plane": "https://media.discordapp.net/attachments/924051841631805461/1130649908593049640/plen.png",
+            "car": "https://media.discordapp.net/attachments/924051841631805461/1130649908869861397/spec.png",
+            "walk": "https://media.discordapp.net/attachments/924051841631805461/1130649909159264316/walk.png",
+            "unicycle": "https://media.discordapp.net/attachments/942505193893945394/1130916070455259247/image.png",
+            "titan": "https://media.discordapp.net/attachments/942505193893945394/1130915423802630166/image.png",
+            "tank": "https://media.discordapp.net/attachments/942505193893945394/1130926682321191012/IMG_1307.png"
+        }
+        
+        
 
 
         if not (time_diff > config["cooldowntime"] or message.channel.id != self.last_channel):
@@ -96,28 +85,13 @@ class AutoResponse(commands.Cog):
                             return
                             
                         elif self.bot.user.mentioned_in(message):
-                            if re.search("bike", message.content.lower()):
-                                await message.channel.send("https://cdn.discordapp.com/attachments/924051841631805461/1128540732358131753/image.png", reference=message)
-                                print("Sent a bike!")
-                            if re.search("plane", message.content.lower()):
-                                await message.channel.send("https://media.discordapp.net/attachments/924051841631805461/1130649908593049640/plen.png", reference=message)
-                                print("Sent a plane!")
-                            if re.search("car", message.content.lower()):
-                                await message.channel.send("https://media.discordapp.net/attachments/924051841631805461/1130649908869861397/spec.png", reference=message)
-                                print("Sent a car!")
-                            if re.search("walk", message.content.lower()):
-                                await message.channel.send("https://media.discordapp.net/attachments/924051841631805461/1130649909159264316/walk.png?width=668&height=559", reference=message)
-                                print("My bitchass be walkin")
-                            if re.search("unicycle", message.content.lower()):
-                                await message.channel.send("https://media.discordapp.net/attachments/942505193893945394/1130916070455259247/image.png", reference=message)
-                                print("Sent a unicycle!")
-                            if re.search("titan", message.content.lower()):
-                                await message.channel.send("https://media.discordapp.net/attachments/942505193893945394/1130915423802630166/image.png", reference=message)
-                                print("Sent a titan!")
-                            if re.search("tank", message.content.lower()):
-                                await message.channel.send("https://media.discordapp.net/attachments/942505193893945394/1130926682321191012/IMG_1307.png?width=496&height=559", reference=message)
-                                print("Sent a tank!")
+                            image_match = next((key for key in text_image_map if re.search(key, message.content.lower())))
                             
+                            if image_match:
+                                await message.channel.send(text_image_map[image_match], reference=message)
+                                print(f"Sent a {image_match}")
+                            else:
+                                print("No matching keyword was found")     
 
                         elif re.search("player.*account", message.content.lower()):
                             await message.channel.send(reference=message, embed=playeraccount)
@@ -132,7 +106,7 @@ class AutoResponse(commands.Cog):
                             print("Controller embed reply sent")
                             
                         elif re.search("authentication.*failed", message.content.lower()) or re.search("cant.*join", message.content.lower()):
-                            if EnabledCheck() == True:
+                            if util.MasterStatus.IsMasterDown() == True:
                                 await message.channel.send(reference=message, embed=msdownembed)
                             else:
                                 return
