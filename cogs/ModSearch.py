@@ -20,7 +20,7 @@ class ModSearch(commands.Cog):
         
         mods = {}
         for i, item in enumerate(data):
-            match = re.search(search_string, mod["name"], re.IGNORECASE)
+            match = re.search(search_string, item["name"], re.IGNORECASE)
             if match:
                 downloads = 0
                 for version in item['versions']:
