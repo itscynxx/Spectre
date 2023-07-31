@@ -44,7 +44,7 @@ class ModSearch(commands.Cog):
         def get_mod_embed():
             key = pages[current_page]
             mod = sorted_mods_by_dl[key]
-            mod_embed_desc = f"By {mod['owner']}\n{mod['description']}\nLast Updated: {mod['last_update']}\nDownload: {mod['total_dl']}\n{mod['dl_url']}"
+            mod_embed_desc = f"By {mod['owner']}\n{mod['description']}\nLast Updated: {mod['last_update']}\nDownloads: {mod['total_dl']}\n{mod['dl_url']}"
             embed_title = f"{mod['name']} ({current_page + 1}/{len(pages)})"
             embed = discord.Embed(
                 title=embed_title,
