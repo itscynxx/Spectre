@@ -29,7 +29,7 @@ class ModSearch(commands.Cog):
                     for version in item['versions']:
                         downloads = downloads + version['downloads']
                     mods["result_" + str(i)] = {
-                        "name": item['name'],
+                        "name": item['name'].replace("_", " "),
                         "owner": item['owner'],
                         "icon_url": item['versions'][0]['icon'],
                         "dl_url": item['versions'][0]['download_url'],
