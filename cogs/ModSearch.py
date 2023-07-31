@@ -17,19 +17,37 @@ class ModSearch(commands.Cog):
         except requests.exceptions.RequestException as err:
             print(err)
             return
-           
-        match_count = 0
-        for mod in data:
+        
+        mods = {}
+        for i, item in enumerate(data):
             match = re.search(search_string, mod["name"], re.IGNORECASE)
-            if match and match_count < 3:
-                mod_desc = f"By {mod['owner']}\n{mod['versions'][0]['description']}\n{mod['versions'][0]['download_url']}"
-                embed = discord.Embed(
-                    title=mod["name"],
-                    description=mod_desc
-                )
-                embed.set_thumbnail(url=mod['versions'][0]['icon'])
-                await ctx.send(embed=embed)
-                match_count = match_count + 1
+            if match:
+                downloads = 0
+                for version in item['versions']:
+                    downloads = downloads + version['downloads']
+                mods["result_" + str(i)] = {
+                    "name": item['name'],
+                    "owner": item['owner'],
+                    "icon_url": item['versions'][0]['icon'],
+                    "dl_url": item['versions'][0]['download_url'],
+                    "last_update": item['date_updated'],
+                    "total_dl": downloads,
+                    "description": item['versions'][0]['description']
+                }
+        
+        # Sort mods by most downloaded by default until we get better sorting later        
+        sorted_mods_by_dl = dict(sorted(mods.items(), key=lambda item: item[1]['total_dl'], reverse=True))
+        
+        # WARNING: In it's current state, Spectre will spam the channel with complete search results
+        for key in sorted_mods_by_dl:
+            mod = sorted_mods_by_dl[key]
+            mod_embed_desc = f"By {mod['owner']}\n{mod['description']}\nLast Updated: {mod['last_update']}\nDownloads: {mod['total_dl']}\n{mod['dl_url']}"
+            embed = discord.Embed(
+                title=mod["name"],
+                description=mod_embed_desc
+            )
+            embed.set_thumbnail(url=mod['icon_url'])
+            await ctx.send(embed=embed)
         
 
 async def setup(bot: commands.Bot) -> None:
