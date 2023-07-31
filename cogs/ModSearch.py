@@ -7,7 +7,7 @@ class ModSearch(commands.Cog):
     def __init__(self, bot :commands.Bot) -> None:
         self.bot = bot
         
-    @commands.hybrid_command(description="Check Northstar master server status")
+    @commands.hybrid_command(description="Search Northstar Thunderstore for mods")
     async def searchts(self, ctx, search_string: str):
         try:
             response = requests.get("https://northstar.thunderstore.io/api/v1/package/")
