@@ -69,7 +69,7 @@ class ModSearch(commands.Cog):
         reactions = ['⏮️', '◀️', '▶️', '⏭️']
         for reaction in reactions:
             await message.add_reaction(reaction)
-            sleep(0.100) # Sleep for 100ms to hopefully avoid reactions getting placed out-of-order
+            sleep(0.050) # Sleep for 100ms to hopefully avoid reactions getting placed out-of-order
             
         def check_react(reaction, user):
             return user == ctx.author and str(reaction.emoji) in reactions
