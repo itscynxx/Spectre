@@ -47,6 +47,10 @@ class ModSearch(commands.Cog):
                     "total_dl": downloads,
                     "description": item['versions'][0]['description']
                 }
+                
+        if not mods:
+            await ctx.send("No mods found")
+            return
         
         # Sort mods by most downloaded by default until we get better sorting later        
         sorted_mods_by_dl = dict(sorted(mods.items(), key=lambda item: item[1]['total_dl'], reverse=True))
