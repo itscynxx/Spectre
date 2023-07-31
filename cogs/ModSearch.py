@@ -71,7 +71,7 @@ class ModSearch(commands.Cog):
         
         while True:
             try:
-                reaction, _ = await self.bot.wait_for('reaction_add', timeout=60.0, check=check_react)
+                reaction, _ = await self.bot.wait_for('reaction_add', timeout=30.0, check=check_react)
                 
                 if str(reaction.emoji) == '⏮️':
                     current_page = 0
