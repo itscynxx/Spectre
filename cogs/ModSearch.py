@@ -1,7 +1,7 @@
 from discord.ext import commands
 import requests, re
 import discord
-
+import asyncio
 
 class ModSearch(commands.Cog):
     def __init__(self, bot :commands.Bot) -> None:
@@ -38,17 +38,47 @@ class ModSearch(commands.Cog):
         # Sort mods by most downloaded by default until we get better sorting later        
         sorted_mods_by_dl = dict(sorted(mods.items(), key=lambda item: item[1]['total_dl'], reverse=True))
         
-        # WARNING: In it's current state, Spectre will spam the channel with complete search results
-        for key in sorted_mods_by_dl:
+        pages = list(sorted_mods_by_dl.keys())
+        current_page = 0
+        
+        def get_mod_embed():
+            key = pages[current_page]
             mod = sorted_mods_by_dl[key]
             mod_embed_desc = f"By {mod['owner']}\n{mod['description']}\nLast Updated: {mod['last_update']}\nDownloads: {mod['total_dl']}\n{mod['dl_url']}"
             embed = discord.Embed(
                 title=mod["name"],
                 description=mod_embed_desc
             )
-            embed.set_thumbnail(url=mod['icon_url'])
-            await ctx.send(embed=embed)
+            return embed
         
+        message = await ctx.send(embed=get_mod_embed())
+        reactions = ['⏮️', '◀️', '▶️', '⏭️']
+        for reaction in reactions:
+            await message.add_reaction(reaction)
+            
+        def check_react(reaction, user):
+            return user == ctx.author and str(reaction.emoji) in reactions
+        
+        while True:
+            try:
+                reaction, _ = await self.bot.wait_for('reaction_add', timeout=60.0, check=check_react)
+                
+                if str(reaction.emoji) == '⏮️':
+                    current_page = 0
+                elif str(reaction.emoji) == '◀️':
+                    current_page = (current_page - 1) % len(pages)
+                elif str(reaction.emoji) == '▶️':
+                    current_page = (current_page + 1) % len(pages)
+                elif str(reaction.emoji) == '⏭️':
+                    current_page = len(pages) - 1
+                
+                await message.edit(embed=get_mod_embed())
+                await message.remove_reaction(reaction, ctx.author)
+                
+            except asyncio.TimeoutError:
+                break
+            
+        await message.clear_reactions()              
 
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(ModSearch(bot))
