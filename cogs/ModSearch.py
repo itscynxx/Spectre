@@ -50,6 +50,7 @@ class ModSearch(commands.Cog):
                 title=embed_title,
                 description=mod_embed_desc
             )
+            embed.set_thumbnail(url=mod['icon_url'])
             return embed
         
         message = await ctx.send(embed=get_mod_embed())
