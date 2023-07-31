@@ -11,6 +11,9 @@ class ModSearch(commands.Cog):
         
     @commands.hybrid_command(description="Search Northstar Thunderstore for mods")
     async def searchts(self, ctx, search_string: str):
+        
+        global active_search
+        
         if active_search:
             await ctx.send("Please wait for the active search to timeout")
             return
