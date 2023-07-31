@@ -29,6 +29,7 @@ class ModSearch(commands.Cog):
                 )
                 embed.set_thumbnail(url=mod['versions'][0]['icon'])
                 await ctx.send(embed=embed)
+                match_count = match_count + 1
         
 
 async def setup(bot: commands.Bot) -> None:
