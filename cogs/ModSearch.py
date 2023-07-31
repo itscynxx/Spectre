@@ -1,7 +1,7 @@
 from discord.ext import commands
 import requests, re
-import discord
-import asyncio
+import discord, asyncio
+from time import sleep
 
 class ModSearch(commands.Cog):
     def __init__(self, bot :commands.Bot) -> None:
@@ -57,6 +57,7 @@ class ModSearch(commands.Cog):
         reactions = ['⏮️', '◀️', '▶️', '⏭️']
         for reaction in reactions:
             await message.add_reaction(reaction)
+            sleep(0.100) # Sleep for 100ms to hopefully avoid reactions getting placed out-of-order
             
         def check_react(reaction, user):
             return user == ctx.author and str(reaction.emoji) in reactions
