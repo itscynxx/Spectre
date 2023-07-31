@@ -14,6 +14,10 @@ class ModSearch(commands.Cog):
         
         global active_search
         
+        if len(search_string) < 3:
+            await ctx.send("Search must be at least 3 characters")
+            return
+        
         if active_search:
             await ctx.send("Please wait for the active search to timeout")
             return
