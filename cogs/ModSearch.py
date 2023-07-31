@@ -3,11 +3,11 @@ import requests, re
 import discord, asyncio
 from time import sleep
 
+active_search = False
+
 class ModSearch(commands.Cog):
     def __init__(self, bot :commands.Bot) -> None:
-        self.bot = bot
-        
-    active_search = False
+        self.bot = bot 
         
     @commands.hybrid_command(description="Search Northstar Thunderstore for mods")
     async def searchts(self, ctx, search_string: str):
