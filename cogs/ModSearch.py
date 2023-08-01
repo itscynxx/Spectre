@@ -42,7 +42,7 @@ class ModSearch(commands.Cog):
                     "name": item['name'].replace("_", " "),
                     "owner": item['owner'],
                     "icon_url": item['versions'][0]['icon'],
-                    "dl_url": item['versions'][0]['download_url'],
+                    "ts_url": item['package_url'],
                     "last_update": item['date_updated'][:(item['date_updated'].index('T'))], # Remove time from date string
                     "total_dl": downloads,
                     "description": item['versions'][0]['description']
@@ -61,7 +61,7 @@ class ModSearch(commands.Cog):
         def get_mod_embed():
             key = pages[current_page]
             mod = sorted_mods_by_dl[key]
-            mod_embed_desc = f"By {mod['owner']}\n{mod['description']}\nLast Updated: {mod['last_update']}\nDownloads: {mod['total_dl']}\n{mod['dl_url']}"
+            mod_embed_desc = f"By {mod['owner']}\n{mod['description']}\nLast Updated: {mod['last_update']}\nDownloads: {mod['total_dl']}\n{mod['ts_url']}"
             embed_title = f"{mod['name']} ({current_page + 1}/{len(pages)})"
             embed = discord.Embed(
                 title=embed_title,
