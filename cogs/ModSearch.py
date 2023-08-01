@@ -95,8 +95,10 @@ class ModSearch(commands.Cog):
                 elif str(reaction.emoji) == '⏭️':
                     current_page = len(pages) - 1
                 elif str(reaction.emoji) == '❌':
+                    active_search = False
                     await message.delete()
-                    raise asyncio.TimeoutError("Search cancelled")
+                    await message.send("Search cancelled")
+                    return
                 
                 await message.edit(embed=get_mod_embed())
                 await message.remove_reaction(reaction, ctx.author)
