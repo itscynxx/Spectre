@@ -74,7 +74,7 @@ class ModSearch(commands.Cog):
         
         active_search = True
         
-        reactions = ['⏮️', '◀️', '▶️', '⏭️']
+        reactions = ['⏮️', '◀️', '▶️', '⏭️', '❌']
         for reaction in reactions:
             await message.add_reaction(reaction)
             sleep(0.050) # Sleep for 100ms to hopefully avoid reactions getting placed out-of-order
@@ -94,6 +94,9 @@ class ModSearch(commands.Cog):
                     current_page = (current_page + 1) % len(pages)
                 elif str(reaction.emoji) == '⏭️':
                     current_page = len(pages) - 1
+                elif str(reaction.emoji) == '❌':
+                    await message.delete()
+                    raise asyncio.TimeoutError("Search cancelled")
                 
                 await message.edit(embed=get_mod_embed())
                 await message.remove_reaction(reaction, ctx.author)
