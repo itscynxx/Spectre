@@ -43,7 +43,7 @@ class ModSearch(commands.Cog):
                     "owner": item['owner'],
                     "icon_url": item['versions'][0]['icon'],
                     "dl_url": item['versions'][0]['download_url'],
-                    "last_update": item['date_updated'],
+                    "last_update": item['date_updated'][:(item['date_updated'].index('T'))], # Remove time from date string
                     "total_dl": downloads,
                     "description": item['versions'][0]['description']
                 }
