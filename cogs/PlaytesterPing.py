@@ -1,6 +1,10 @@
 import discord
 from discord.ext import commands
 import requests
+import os
+
+URL = "https://api.github.com/graphql" # GraphQL API endpoint
+GH_ACCESS_TOKEN = os.getenv("GH_ACCESS_TOKEN")
 
 def versionCheck():
     try:
@@ -15,6 +19,54 @@ def versionCheck():
     
     ns_current_version = gh_data["name"][1:] # This gets the version as the raw version number without the "v". So '1.7.3' vs 'v1.7.3'
     return ns_current_version
+
+def getLatestDiscussion():
+    # We need to pass a personal access token to the API in order to bypass the "rate limit". Pass this as an environment var
+    headers = {
+        "Authorization": f"Bearer {GH_ACCESS_TOKEN}"
+    }
+    # Query generated from https://docs.github.com/en/graphql/overview/explorer
+    query = """
+    query {
+        repository(owner: "R2Northstar", name: "Northstar") {
+            discussions(first: 1) {
+                edges {
+                    node {
+                        author {
+                            login
+                            url
+                        }
+                        title
+                        number
+                        body
+                        url
+                    }
+                }
+            }
+        }
+    }
+    """
+    
+    try:
+        response = requests.post(URL, json={"query": query}, headers=headers) # Sending the query as json and the access token as the header
+        if response.status_code == 200:
+            raw_data = response.json()
+            
+    except requests.exceptions.RequestException as err:
+        print(f"GitHub API request failed: {err}")
+        return None
+    
+    # Dumping the important data into a new dict so it's easier to work with later
+    discussion_post = {
+        'author': raw_data["data"]["repository"]["discussions"]["edges"][0]["node"]["author"]["login"],
+        'title': raw_data["data"]["repository"]["discussions"]["edges"][0]["node"]["title"],
+        'body': raw_data["data"]["repository"]["discussions"]["edges"][0]["node"]["body"],
+        'number': raw_data["data"]["repository"]["discussions"]["edges"][0]["node"]["number"],
+        'url': raw_data["data"]["repository"]["discussions"]["edges"][0]["node"]["url"]
+    }
+    
+    return discussion_post
+            
 
 class PlayTesterPing(commands.Cog):
     def __init__(self, bot :commands.Bot) -> None:
