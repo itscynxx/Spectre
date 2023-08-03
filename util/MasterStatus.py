@@ -10,5 +10,5 @@ def IsMasterDown():
         else:
             return True
     except requests.exceptions.RequestException as err:
-        print(f"Ecnountered exception while requesting MS: {err}")
+        print(f"Encountered exception while requesting MS: {err}")
         return None
