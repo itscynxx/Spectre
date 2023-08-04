@@ -69,6 +69,8 @@ class ModSearch(commands.Cog):
         for i, item in enumerate(data):
             match = re.search(search_string, item["name"], re.IGNORECASE)
             if match:
+                if item['has_nsfw_content']: # Prevent mods labelled as containing NSFW content from appearing in searches
+                    continue
                 downloads = 0
                 for version in item['versions']:
                     downloads = downloads + version['downloads']
