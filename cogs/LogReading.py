@@ -153,7 +153,7 @@ class LogReading(commands.Cog):
                                 if "Finished async read of audio sample" in line:
                                     
                                     # Split the string after "R2Northstar/mods" to keep the folder name onwards
-                                    a = line.split("R2Northstar/mods")[1]
+                                    a = line.split("R2Northstar\mods")[1]
                                     # Split the previous split at "audio" to cleanly format as "FolderName, audioname" 
                                     # side note: why the fuck don't we use the mod name at all literally anywhere even when registering the audio fully
                                     b = a.split("audio")
