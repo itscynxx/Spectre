@@ -3,6 +3,7 @@ from discord.ext import commands
 import util.JsonHandler
 from time import sleep
 import requests
+import shutil
 import os
 
 def decodetext(text, text_to_filter, text_to_filter2):
@@ -89,9 +90,12 @@ class LogReading(commands.Cog):
             if str(message.channel.id) in allowed_channels or str(message.channel.name).startswith("ticket"):
                 if message.attachments:
                     filename = message.attachments[0].filename  
-                    if 'nslog' in filename and filename.endswith('.txt'): 
-                        await message.attachments[0].save("Logs/nslogunparsed.txt")
+                    if 'nslog' in filename and filename.endswith('.txt'):       
                         print("Found a log!")
+                        if os.path.exists("Logs") == False:
+                            os.mkdir("Logs")
+                            
+                        await message.attachments[0].save("Logs/nslogunparsed.txt")
                         with open(r"Logs/nslogunparsed.txt", "r") as file:
                             lines = file.readlines()
                             
@@ -250,7 +254,7 @@ class LogReading(commands.Cog):
 
                             print("I didn't find any problems in the log!")
 
-                        os.remove("Logs/nslogunparsed.txt")
+                        shutil.rmtree("Logs")
             
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(LogReading(bot))
