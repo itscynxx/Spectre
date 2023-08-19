@@ -34,11 +34,36 @@ def versionCheck():
    
 audioList = []
 modSplitList = []
+modsList = []
+modsListDisabled = []
+modsDisabledCore = []
 
 problem = discord.Embed(title="Problems I found in your log:", description="", color=0x5D3FD3)
 dmLog = discord.Embed(title="Somebody sent a log!", description="", color=0x5D3FD3)
 oldLog = discord.Embed(title="It looks like the log you've sent is older! Please send the newest one.", description="Windows puts the newest logs at the bottom of the logs folder due to how they're named.", color=0x5D3FD3) 
 
+class LogButtons(discord.ui.View):    
+
+    # note: disabled mods still appear in enabled list. dunno why
+    @discord.ui.button(label="List of enabled mods", style=discord.ButtonStyle.success)
+    async def modList(self, interaction: discord.Interaction, button: discord.ui.Button):
+        modString = ""
+        for mod in modsList:
+            if mod + "\n" in modsListDisabled:
+                continue
+            else:
+                modString = modString + "- " + mod
+        
+        await interaction.response.send_message(f"The user has the following mods enabled: \n{modString}", ephemeral=True)
+
+    @discord.ui.button(label="List of disabled mods", style=discord.ButtonStyle.red)
+    async def modListDisabled(self, interaction: discord.Interaction, button: discord.ui.Button):
+        modStringDisabled = ""
+        for mod in modsListDisabled:
+            modStringDisabled = modStringDisabled + "- " + mod
+        
+        await interaction.response.send_message(f"The user has the following mods disabled: \n{modStringDisabled}", ephemeral=True)
+        
 class LogReading(commands.Cog):
     def __init__(self, bot :commands.Bot) -> None:
         self.bot = bot
@@ -68,6 +93,7 @@ class LogReading(commands.Cog):
         global modsInstalled 
         global betterServerBrowser
         global oldVersion
+        global disabledCoreMod
         hud = False
         callback = False
         compileErrorClientKillCallback = False
@@ -78,7 +104,9 @@ class LogReading(commands.Cog):
         modsInstalled = False
         betterServerBrowser = False
         oldVersion = False
+        disabledCoreMod = False
 
+        view = LogButtons()
 
         allowed_channels = util.JsonHandler.load_channels()
         if message.author.bot:
@@ -90,7 +118,12 @@ class LogReading(commands.Cog):
             if str(message.channel.id) in allowed_channels or str(message.channel.name).startswith("ticket"):
                 if message.attachments:
                     filename = message.attachments[0].filename  
-                    if 'nslog' in filename and filename.endswith('.txt'):       
+                    if 'nslog' in filename and filename.endswith('.txt'):     
+
+                        modsList.clear()
+                        modsListDisabled.clear() 
+                        modsDisabledCore.clear()
+                        
                         print("Found a log!")
                         if os.path.exists("Logs") == False:
                             os.mkdir("Logs")
@@ -112,7 +145,27 @@ class LogReading(commands.Cog):
                                         oldVersion = True
 
                                 # Check mods
+                                
+                                if "(DISABLED)" in line:
+                                    if "Northstar.Client" in line or "Northtar.Custom" in line or "Northstar.CustomServers" in line:
+                                        disabledCoreMod = True 
+                                        modsDisabledCore.append(line.split("'")[1])
+                                    print(line.split("'")[1])
+                                    modsListDisabled.append(line.split("'")[1])
+
+                                if "blacklisted mod" in line:
+                                    modsListDisabled.append(line.split('"')[1] + " (blacklisted)\n")
+                                    
                                 if "Loading mod" in line:
+
+                                    if "R2Northstar" in line:
+                                        continue
+                                    else:
+                                        for mod in modsListDisabled:
+                                            if mod + "\n" in line:
+                                                continue
+                                            else:
+                                                modsList.append(line.split("Loading mod")[1])
 
                                     # Check if HUD Revamp is installed: conflicts with Client Kill callback
                                     if "HUD Revamp" in line:
@@ -193,6 +246,21 @@ class LogReading(commands.Cog):
                             await message.channel.typing()
                             sleep(5)
 
+                            if disabledCoreMod == True:
+                                disabledCoreString = ""     
+
+                                if len(modsDisabledCore) > 1:
+                                    if len(modsDisabledCore) == 2:
+                                        for mod in modsDisabledCore:
+                                            disabledCoreString = disabledCoreString + mod       
+
+                                    problem.add_field(name="Disabled core mods", value=f"The core mods {disabledCoreString} are disabled! Please re-enable them using a mod manager or by deleting `Titanfall2/R2Northstar/enabledmods.json` (this only applies if trying to play Northstar. If you are playing vanilla via Northstar and encountering an issue, it is something else)", inline=False)
+
+                                elif len(modsDisabledCore) == 1:
+                                    for mod in modsDisabledCore:
+                                        disabledCoreString = disabledCoreString + mod
+                                    problem.add_field(name="Disabled core mod", value=f"The core mod {disabledCoreString} is disabled! Please re-enable it using a mod manager or by deleting `Titanfall2/R2Northstar/enabledmods.json` (this only applies if trying to play Northstar. If you are playing vanilla via Northstar and encountering an issue, it is something else)", inline=False)
+      
                             if hud == True and callback == True and compileErrorClientKillCallback == True:
                                 problem.add_field(name="", value="I noticed you have both HUD Revamp and Client Kill Callback installed. Currently, these two mods create conflicts. The easiest way to solve this is to delete/disable HUD Revamp.", inline=False)
 
