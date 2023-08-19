@@ -91,6 +91,7 @@ class LogReading(commands.Cog):
         global rgbError
         global frameworkError
         global modsInstalled 
+        global crashCounter 
         global betterServerBrowser
         global oldVersion
         global disabledCoreMod
@@ -101,10 +102,12 @@ class LogReading(commands.Cog):
         audioProblem = False
         rgbError = False
         frameworkError = False
+        badMod = ""
         modsInstalled = False
         betterServerBrowser = False
         oldVersion = False
         disabledCoreMod = False
+        crashCounter = 0
 
         view = LogButtons()
 
@@ -220,6 +223,47 @@ class LogReading(commands.Cog):
                                     # Add these to the audio list for checking for errors
                                     audioList.append(c)
 
+                                if "[NORTHSTAR] [error] Northstar has crashed! a minidump has been written and exception info is available below:" in line: # Checks for first line of the crash section of the log
+                                    checkLine = lines[i - 2] # Stores the previous line (right before the crash), we have to skip the version printout
+                                    crashCounter += 1
+                                    if crashCounter == 2: # More than 1 crash, flip multiCrash to true. Only needs to happen once so check for equality
+                                        multiCrash = True
+                                    elif "LoadStreamPak" in checkLine and crashCounter == 1: # Check for paks being loaded right before crash, only search if one crash 
+                                        modProblem = True
+                                        # Use regex to grab the name of the pak that probably failed
+                                        match = re.search(r'LoadStreamPak: (\S+)', checkLine)
+                                        global badStreamPakLoad
+                                        badStreamPakLoad = str(match.group(1))
+                                        problemFound = True
+
+                                        # this shit is so fucking gross oh my fucking god
+                                        # i am so sorry for what i did to your code tony
+                                        for lineAgain in lines:
+                                            if f"registered starpak '{badStreamPakLoad}'" in lineAgain:
+                                                   
+                                                match = re.search(r'Mod\s+(.*?)\s+registered', lineAgain)                                               
+                                                badStreamPakLoad = match.group(1) # Store problematic mod in global var
+
+                                        file.close()
+
+                                        with open(r"Logs/nslogstarpaks.txt", "w") as file1:
+                                            file1.write(f"Bad streampak: {badStreamPakLoad}")
+                                            file1.close()
+                                        
+                                        with open(r"Logs/nslogstarpaks.txt", "r") as file2:
+                                            lines = file2.readlines()
+
+                                            for i, line in enumerate(lines):
+                                                if "Bad streampak: " in line:
+                                                    badMod = line.split("Bad streampak: ")[1]
+
+
+                                                    # Run back over the log to find what mod the pak is registered with
+                                                    if badMod == "Northstar.Custom":
+                                                        doubleBarrelCrash = True             
+                                                    file2.close()
+                                                    break # End the loop as it is no longer useful
+
                         # Properly set up the list for actual checking
                         d = list(set(tuple(audio) for audio in audioList))
 
@@ -293,6 +337,15 @@ class LogReading(commands.Cog):
                             if audioProblem == True:
                                 problem.add_field(name="Fixing audio replacement conflicts", value="Please remove mods until only one of these audio mods are enabled. These names aren't perfect to what they are for the mod, however they are the file names for the mod, so you can just remove the folder matching the name from `Titanfall2/R2Northstar/mods`.", inline=False)
 
+                            if modProblem == True:  
+                                if doubleBarrelCrash == True:
+
+                                    problem.add_field(name="Mod crashing", value= "Northstar crashed right after loading the double barrel assets.\nPlease try deleting `w_shotgun_doublebarrel.mdl` from `Titanfall2/R2Northstar/mods/Northstar.Custom/mod/models/weapon/shotgun_doublebarrel`.\nDoing this will solve this specific crash, but will make you hold an error when trying to use the double barrel in game.")
+
+                                else:
+
+                                    problem.add_field(name="Mod crashing", value=f"Northstar crashed right after attempting to load as asset from the mod `{badMod}`. Please try removing/disabling this mod to see if this solves the issue.")
+                            
                             problem.add_field(name="", value="Please note that I am a bot and am still heavily being worked on. There is a chance that some or all of this information is incorrect, in which case I apologize.\nIf you still encounter issues after doing this, please send another log.", inline=False)
                             await message.channel.send(embed=problem, reference=message)     
                             
@@ -312,7 +365,8 @@ class LogReading(commands.Cog):
                             frameworkError = False
                             betterServerBrowser = False
                             oldVersion = False
-                            
+                            modProblem = False
+                            badMod = ""  
 
                         elif problemFound == False:
                             dmme = await self.bot.fetch_user(self.bot.owner_id)
