@@ -16,6 +16,9 @@ class AllowedUsers(commands.Cog):
     
         if ctx.author.id == self.bot.owner_id:
 
+            if user is not None and Role is not None:
+                await ctx.send("Please only select either a user or a role to allow!", ephemeral=True)
+
             if user is not None:
                 if str(user.id) in allowed_users:
                     del allowed_users[str(user.id)]
@@ -34,7 +37,9 @@ class AllowedUsers(commands.Cog):
                     allowed_users[str(role.id)] = role.name
                     await ctx.send(f"Successfully allowed {role.name} to use bot commands")
                 
-            util.JsonHandler.save_allowed_users(allowed_users) 
+            else:
+                await ctx.send("Please select either a user or a role to allow!", ephemeral=True)
+                util.JsonHandler.save_allowed_users(allowed_users) 
 
         else:
             await ctx.send("You don't have permission to use this command!", ephemeral=True)
