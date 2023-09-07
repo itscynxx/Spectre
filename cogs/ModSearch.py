@@ -1,6 +1,8 @@
 from discord.ext import commands
 import requests, re
 import discord, asyncio
+from discord import app_commands
+from typing import Optional
 
 class PaginationView(discord.ui.View):
     
@@ -48,7 +50,11 @@ class ModSearch(commands.Cog):
         self.bot = bot 
         
     @commands.hybrid_command(description="Search Northstar Thunderstore for mods")
-    async def modsearch(self, ctx, search_string: str):
+    @app_commands.choices(method=[
+        app_commands.Choice(name="Mod name", value="name"),
+        app_commands.Choice(name="Mod author", value="owner")
+        ])
+    async def modsearch(self, ctx, search_string: str, method: Optional[app_commands.Choice[str]]):
         
         if len(search_string) < 3:
             character_warning = await ctx.send("Search must be at least 3 characters", ephemeral=True)
@@ -60,14 +66,17 @@ class ModSearch(commands.Cog):
             response = requests.get("https://northstar.thunderstore.io/api/v1/package/")
             if response.status_code == 200:
                 data = response.json()
-        
+    
         except requests.exceptions.RequestException as err:
             print(err)
             return
         
         mods = {}
         for i, item in enumerate(data):
-            match = re.search(search_string, item["name"], re.IGNORECASE)
+            if method == "owner":
+                match = re.search(search_string, item["owner"], re.IGNORECASE)
+            else:
+                match = re.search(search_string, item["name"], re.IGNORECASE)
             if match:
                 if item['has_nsfw_content']: # Prevent mods labelled as containing NSFW content from appearing in searches
                     continue
