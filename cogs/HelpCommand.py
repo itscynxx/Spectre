@@ -12,7 +12,7 @@ class helpCommand(commands.Cog):
         helpembed.add_field(name="togglereplies", value="Toggles the bot replying to the person who used the command", inline=False)
         helpembed.add_field(name="replystatus", value="Sends an embed about the status of replies for the user", inline=False)
         helpembed.add_field(name="price", value="Shows the current price of Titanfall 2, and if it's on sale. Entering a region with a slash command allows you to search by region", inline=False)
-        helpembed.add_field(name="", value="You can view a full list of the commands on the [GitHub repo's wiki](https://github.com/CooldudePUGS/Spectre/wiki)", inline=False)
+        helpembed.add_field(name="", value="You can view a full list of the commands on the [GitHub repo's wiki](https://github.com/itscynxx/Spectre/wiki)", inline=False)
         await ctx.send(embed=helpembed, ephemeral=True)
 
 
