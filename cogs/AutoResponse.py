@@ -79,7 +79,7 @@ class AutoResponse(commands.Cog):
                 if str(message.author.id) in neverusers:
                         return
                 
-                if str(message.channel.id) in enabledchannels:
+                if str(message.channel.id) in enabledchannels or str(message.channel.name).startswith("ticket"):
                         # Should stop all bot messages
                         if message.author.bot:
                             return
