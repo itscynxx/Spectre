@@ -5,6 +5,7 @@ from time import sleep
 import requests
 import shutil
 import os
+import re
 
 def decodetext(text, text_to_filter, text_to_filter2):
     filtered_bytes = text.replace(b'\x82', b'')
