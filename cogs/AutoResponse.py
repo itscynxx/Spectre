@@ -4,7 +4,7 @@ from discord.ext import commands
 import util.JsonHandler, util.MasterStatus
 from cogs.GlobalReplies import replycheck
 import re
-
+import asyncio
 
 # Embed for automatically replying to potential questions about installing Northstar
 installing = discord.Embed(description="I noticed that you may have asked for help installing Northstar. Please read the [installation channel](https://discordapp.com/channels/920776187884732556/922662496588943430) for ways to install Northstar.\n\nIf I'm being accidentally triggered or annoying, please disable replies with the button below or ping @cooldudepugs", color=0x5D3FD3)
@@ -119,7 +119,20 @@ class AutoResponse(commands.Cog):
                             await message.channel.send(reference=message, embed=installmods)
                             await message.channel.send("https://cdn.discordapp.com/attachments/942391932137668618/1069362595192127578/instruction_bruh.png")
                             print(f"Northstar mods installing embed reply sent")
-                            
+
+                    if message.channel.id == 937922165163065384:
+
+                            # Note: this is actually really gross. discord's api doesn't like when you try to add multiple emojis at once (say, from a list)
+                            # and will instead place them in the incorrect order regardless of sleep time or order you place them in the list :P
+
+                            await message.add_reaction("🔴")
+                            await asyncio.sleep(1)
+
+                            await message.add_reaction("🟡")
+                            await asyncio.sleep(1)
+
+                            await message.add_reaction("🟢")
+                            await asyncio.sleep(1)
                             
                 self.last_time = datetime.datetime.utcnow()
             self.last_channel = message.channel.id
