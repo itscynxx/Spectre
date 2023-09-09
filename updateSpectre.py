@@ -21,7 +21,7 @@ if os.path.isfile("Spectre.py") == True:
                 os.mkdir("Spectre")
         
                 # Clone the newest GitHub repo version
-                Repo.clone_from("https://github.com/CooldudePUGS/Spectre", "Spectre")
+                Repo.clone_from("https://github.com/itscynxx/Spectre", "Spectre")
         
                 # Remove the "new" config file. There might be a better way to do this, but this works
                 os.remove("Spectre/config.json")
