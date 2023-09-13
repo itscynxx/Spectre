@@ -120,19 +120,19 @@ class AutoResponse(commands.Cog):
                             await message.channel.send("https://cdn.discordapp.com/attachments/942391932137668618/1069362595192127578/instruction_bruh.png")
                             print(f"Northstar mods installing embed reply sent")
 
-                    if message.channel.id == 937922165163065384:
+                if message.channel.id == 937922165163065384:
 
-                            # Note: this is actually really gross. discord's api doesn't like when you try to add multiple emojis at once (say, from a list)
-                            # and will instead place them in the incorrect order regardless of sleep time or order you place them in the list :P
+                        # Note: this is actually really gross. discord's api doesn't like when you try to add multiple emojis at once (say, from a list)
+                        # and will instead place them in the incorrect order regardless of sleep time or order you place them in the list :P
 
-                            await message.add_reaction("🔴")
-                            await asyncio.sleep(1)
+                        await message.add_reaction("🔴")
+                        await asyncio.sleep(1)
 
-                            await message.add_reaction("🟡")
-                            await asyncio.sleep(1)
+                        await message.add_reaction("🟠")
+                        await asyncio.sleep(1)
 
-                            await message.add_reaction("🟢")
-                            await asyncio.sleep(1)
+                        await message.add_reaction("🟢")
+                        await asyncio.sleep(1)
                             
                 self.last_time = datetime.datetime.utcnow()
             self.last_channel = message.channel.id
