@@ -30,19 +30,6 @@ class AutoResponse(commands.Cog):
         neverusers = util.JsonHandler.load_neverusers()
         enabledchannels = util.JsonHandler.load_channels()
         time_diff = (datetime.datetime.utcnow() - self.last_time).total_seconds()
-        
-        text_image_map = {
-            "bike": "https://cdn.discordapp.com/attachments/924051841631805461/1128540732358131753/image.png",
-            "plane": "https://media.discordapp.net/attachments/924051841631805461/1130649908593049640/plen.png",
-            "car": "https://media.discordapp.net/attachments/924051841631805461/1130649908869861397/spec.png",
-            "walk": "https://media.discordapp.net/attachments/924051841631805461/1130649909159264316/walk.png",
-            "unicycle": "https://media.discordapp.net/attachments/942505193893945394/1130916070455259247/image.png",
-            "titan": "https://media.discordapp.net/attachments/942505193893945394/1130915423802630166/image.png",
-            "tank": "https://media.discordapp.net/attachments/942505193893945394/1130926682321191012/IMG_1307.png"
-        }
-        
-        
-
 
         if not (time_diff > config["cooldowntime"] or message.channel.id != self.last_channel):
             self.last_channel = message.channel.id            
@@ -60,15 +47,6 @@ class AutoResponse(commands.Cog):
                         # Should stop all bot messages
                         if message.author.bot:
                             return
-                            
-                        elif self.bot.user.mentioned_in(message):
-                            image_match = next((key for key in text_image_map if re.search(key, message.content.lower())))
-                            
-                            if image_match:
-                                await message.channel.send(text_image_map[image_match], reference=message)
-                                print(f"Sent a {image_match}")
-                            else:
-                                print("No matching keyword was found")     
 
                         elif re.search("player.*account", message.content.lower()):
                             responseEmbed.add_field(name="Couldn't find player account error", value="Please read the [wiki section for this issue](https://r2northstar.gitbook.io/r2northstar-wiki/installing-northstar/troubleshooting#playeraccount) to solve the error.")
