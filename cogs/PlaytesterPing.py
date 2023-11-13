@@ -71,8 +71,8 @@ class PlayTesterPing(commands.Cog):
         
     @commands.Cog.listener()
     async def on_message(self, message):
-        playtestPingChannel = self.bot.get_channel(936678773150081055)
-        thunderstoreReleaseChannel = self.bot.get_channel(939573786355859498)
+        playtestPingChannel = self.bot.get_channel(1170820923113357343)
+        thunderstoreReleaseChannel = self.bot.get_channel(1170820797653336077)
 
         if message.author == self.bot.user:
             return
@@ -91,7 +91,7 @@ class PlayTesterPing(commands.Cog):
 
                 embed.set_author(name="Northstar " + rcVersion, icon_url="https://avatars.githubusercontent.com/u/86304187")
                 
-                pingMessage = await playtestPingChannel.send(f"<@&936669179359141908>s, there is a new Northstar release candidate, `{rcVersion}`. If you find any issues or have feedback, please inform us in the thread attached to this message.\n\n**Installation**:\nGo to settings in FlightCore, and enable testing release channels (you only need to do this once). After you've done that, go to the play tab, click the arrow next to `LAUNCH GAME`, and select `Northstar release candidate`. Then, click the `UPDATE` button.", embed=embed)
+                pingMessage = await playtestPingChannel.send(f"<@&1170828808702673147>s, there is a new Northstar release candidate, `{rcVersion}`. If you find any issues or have feedback, please inform us in the thread attached to this message.\n\n**Installation**:\nGo to settings in FlightCore, and enable testing release channels. (you only need to do this once) After you've done that, go to the play tab, click the arrow next to `LAUNCH GAME`, and select `Northstar release candidate`. Then, click the `UPDATE` button.", embed=embed)
                 await pingMessage.create_thread(name=rcVersion)
 
 async def setup(bot: commands.Bot) -> None:
