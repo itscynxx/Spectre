@@ -5,8 +5,15 @@ from time import sleep
 import requests
 import shutil
 import os
-import re
+import datetime
 
+errorMessages = []
+issues = []
+disabledMods = []
+enabledMods = []
+
+# not sure if this is needed anymore
+# it isnt currently used, but id rather not get rid of it until rewrite is done
 def decodetext(text, text_to_filter, text_to_filter2):
     filtered_bytes = text.replace(b'\x82', b'')
     decoded_string = filtered_bytes.decode('utf-8')
@@ -18,7 +25,140 @@ def decodetext(text, text_to_filter, text_to_filter2):
             new_text = new_text + i + "\n"
     return new_text
 
+# Functions used for trying to solve actual error messages
+def check_errorMessages( file ):
+    with open(file, "r") as fileread:
+        lines = fileread.readlines()
+        print("Errors:\n") 
+        for line in lines:
+            if "[error]" in line:
+                errorMessages.append(line.split("[error]")[1].lstrip())
 
+        for error in errorMessages:
+            print(error)
+
+
+# This checks the errors we put in the list earlier for ones that I manually add
+# Note: clean this up when I don't have a life again
+# additionally, add checks for if mods are disabled. this way, instead of "disable or install", i can recommend exactly disable OR install
+global hudRevamp
+global ckcallback
+def check_errors():
+    print("Error matches:\n")
+    hudRevamp = False
+    ckcallback = False
+    for error in errorMessages:
+        if "COMPILE ERROR expected \",\", found identifier \"inputParams\"" in error or "COMPILE ERROR expected \",\", found identifier \"Streakperams\"" in error:
+            for mod in enabledMods:
+                if "HUD Revamp" in mod:
+                    hudRevamp = True
+                if "ClientKillCallback" in mod:
+                    ckcallback = True
+            
+            # this is very gross
+            # also needs an update
+            # basically this needs to check:
+            # do they have ckcb (Client Kill CallBack)?
+            # if they do, do they have hud revamp?
+            # if they do, do they have hud announcer or ckcb hud revamp patch?
+            # if they do have the patch, it isnt an issue
+            # if they dont have the patch, respond that they need it due to mod conflicts
+            # if they dont have client kill callback, reply that the error is because they need it
+
+            # currently, the patch is not checked for
+            if ckcallback == True:
+                if hudRevamp == True:
+                    hudRevamp = False
+                    ckcallback = False
+                    return "HudRevampClientKillCallback"
+            else:
+                return "MissingClientKillCallback"
+        
+                
+        if "COMPILE ERROR Undefined variable \"Progression_GetPreference\"" in error:
+            for mod in enabledMods:
+                if "VanillaPlus" in mod:
+                    return "VanillaPlusClientInstalled"
+                
+        if "COMPILE ERROR Undefined variable \"ModSettings_AddDropDown\"" in error:
+            # This function is from NegativBild, no reason to do checking for mods
+            return "MissingNegativBild"
+        
+        if "COMPILE ERROR Undefined variable \"ModSettings_AddModTitle\"" in error:
+            for mod in disabledMods:
+                if "VanillaPlus" in mod:
+                    return "VanillaPlusDisabled"
+                
+
+# Functions used for getting a list of mods from a log
+def check_mods( file ):
+    with open(file, "r") as fileread:
+        lines = fileread.readlines()
+
+        for line in lines:
+            if "loaded successfully" in line.lower():
+                if "disabled" in line.lower():
+                    # why did i call this fullLine?
+                    fullLine = line.split("[info]")[1].strip().replace("'", "")
+                    disabledMods.append(fullLine.split("loaded")[0])
+
+                else:
+                    fullLine = line.split("[info]")[1].strip().replace("'", "")
+                    enabledMods.append(fullLine.split("loaded")[0])
+
+        if len(disabledMods) > 0:
+            print("Disabled mods:\n")
+            for mod in disabledMods:
+                print(mod + "\n")
+
+        if len(enabledMods) > 0:
+            print("Enabled mods:\n")
+            for mod in enabledMods:
+                print(mod + "\n")
+
+
+# this function checks the files date by reading the first line
+# note: this can break if the log is older than the update that adds the date to logs
+# maybe check version first, and if it's a valid version then check this?
+
+# this also has no real function currently, and has no actual reply
+# this is because i want to get this file uploded to the loggingrewrite branch tonight
+def check_filedate( file ):
+    with open(file, "r") as fileread:
+        lines = fileread.readlines()
+        for line in lines:
+            logDate = line.split("[")[1].split("]")[0]
+            break
+
+    nowDate = datetime.today().strftime('%Y-%m-%d') 
+
+    if logDate < nowDate:
+        print("Found an older log")
+
+# This checks if Northstar is in the "log" (which as of now is just any message.txt in the Discord)\
+# If it is, rename it for log checking. If it isn't, print a frowny face to console
+def check_for_log(file):
+    shouldRename = False
+    with open(file, "r") as fileread:
+        lines = fileread.readlines()
+
+        for line in lines:
+            if "Northstar" in line:
+                shouldRename = True
+            else:
+                break
+
+        if shouldRename == True:
+            os.rename(file, "Logs/nslogunparsed.txt")
+        else:
+            print("Spoiler, that wasn't a log :(")
+
+# this function returns the current version of Northstar
+# it is currently unused, but will eventually be
+# this way, Spectre will tell the user to update
+
+# note: do this in an if statement and not a switch statement
+# this should be appended to an embed if another issue also exists
 def versionCheck():
     try:
         gh_api_response = requests.get("https://api.github.com/repos/R2Northstar/Northstar/releases/latest")
@@ -32,38 +172,12 @@ def versionCheck():
     
     ns_current_version = gh_data["name"][1:] # This gets the version as the raw version number without the "v". So '1.7.3' vs 'v1.7.3'
     return ns_current_version
-   
-audioList = []
-modSplitList = []
-modsList = []
-modsListDisabled = []
-modsDisabledCore = []
 
 problem = discord.Embed(title="Problems I found in your log:", description="", color=0x5D3FD3)
+# a currently unused embed for dming me when a log is sent
 dmLog = discord.Embed(title="Somebody sent a log!", description="", color=0x5D3FD3)
+# a currently unused embed for telling someone to send a new log
 oldLog = discord.Embed(title="It looks like the log you've sent is older! Please send the newest one.", description="Windows puts the newest logs at the bottom of the logs folder due to how they're named.", color=0x5D3FD3) 
-
-class LogButtons(discord.ui.View):    
-
-    # note: disabled mods still appear in enabled list. dunno why
-    @discord.ui.button(label="List of enabled mods", style=discord.ButtonStyle.success)
-    async def modList(self, interaction: discord.Interaction, button: discord.ui.Button):
-        modString = ""
-        for mod in modsList:
-            if mod + "\n" in modsListDisabled:
-                continue
-            else:
-                modString = modString + "- " + mod
-        
-        await interaction.response.send_message(f"The user has the following mods enabled: \n{modString}", ephemeral=True)
-
-    @discord.ui.button(label="List of disabled mods", style=discord.ButtonStyle.red)
-    async def modListDisabled(self, interaction: discord.Interaction, button: discord.ui.Button):
-        modStringDisabled = ""
-        for mod in modsListDisabled:
-            modStringDisabled = modStringDisabled + "- " + mod
-        
-        await interaction.response.send_message(f"The user has the following mods disabled: \n{modStringDisabled}", ephemeral=True)
         
 class LogReading(commands.Cog):
     def __init__(self, bot :commands.Bot) -> None:
@@ -73,322 +187,93 @@ class LogReading(commands.Cog):
     intents.messages = True
     intents.message_content = True
 
-            
+    
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel):
+        # when a ticket channel is created, have Spectre "type" for a bit, then ask for logs
         if str(channel.name).startswith("ticket"):
             await channel.typing()
             sleep(3)
-            await channel.send("I'm a bot automatically replying to the ticket being opened. If you're having an issue with the Northstar client itself, please send a log so that I can try to automatically read it, or a human can read it better. You can do this by going to `Titanfall2/R2Northstar/logs` and sending the newest `nslog` you have. Make sure not to send an `nsdmp`, and that you send the newest one! The newest ones are near the bottom by default on windows.\n\nIf I don't automatically respond, please wait for a human to assist. If you're getting an error MESSAGE in game, you could also try typing that out here, as I automatically reply to some of those as well.")
+            await channel.send("I'm a bot automatically replying to the ticket being opened. If you're having an issue with the Northstar client itself, please send a log so that I can try to automatically read it, or a human can read it better. You can do this by going to `Titanfall2/R2Northstar/logs` and sending the furthest down `nslog` file there.\n\nIf I don't automatically respond, please wait for a human to assist. If you're getting an error MESSAGE in game, you could also try typing that out here, or sending a screenshot of the error, as I automatically reply to some of those as well.")
 
     @commands.Cog.listener()
     async def on_message(self, message):
-
-        global hud
-        global callback
-        global compileErrorClientKillCallback
-        global problemFound
-        global audioProblem
-        global rgbError
-        global frameworkError
-        global modsInstalled 
-        global crashCounter 
-        global betterServerBrowser
-        global oldVersion
-        global disabledCoreMod
-        hud = False
-        callback = False
-        compileErrorClientKillCallback = False
-        problemFound = False
-        audioProblem = False
-        rgbError = False
-        frameworkError = False
-        badMod = ""
-        modsInstalled = False
-        betterServerBrowser = False
-        oldVersion = False
-        disabledCoreMod = False
-        crashCounter = 0
-
-        view = LogButtons()
 
         allowed_channels = util.JsonHandler.load_channels()
         if message.author.bot:
             return
         
-
-        else:
-            
+        else:    
             if str(message.channel.id) in allowed_channels or str(message.channel.name).startswith("ticket"):
                 if message.attachments:
                     filename = message.attachments[0].filename  
+                    shouldRespond = False
                     if 'nslog' in filename and filename.endswith('.txt'):     
-
-                        modsList.clear()
-                        modsListDisabled.clear() 
-                        modsDisabledCore.clear()
-                        
-                        print("Found a log!")
                         if os.path.exists("Logs") == False:
                             os.mkdir("Logs")
                             
                         await message.attachments[0].save("Logs/nslogunparsed.txt")
-                        with open(r"Logs/nslogunparsed.txt", "r") as file:
-                            lines = file.readlines()
-                            
-                   
-                            for line in lines:
-                                if "NorthstarLauncher version:" in line:
-                                    
-                                    verSplit = line.split("version:")[1]
-                                    if verSplit.strip() == "0.0.0.1+dev":
-                                        return
-                                    elif verSplit.strip() < versionCheck():
-                                        dmLog.add_field(name="", value=f"Version: {verSplit.strip()}", inline=False)
-                                        problemFound = True
-                                        oldVersion = True
 
-                                # Check mods
-                                
-                                if "(DISABLED)" in line:
-                                    if "Northstar.Client" in line or "Northtar.Custom" in line or "Northstar.CustomServers" in line:
-                                        disabledCoreMod = True 
-                                        modsDisabledCore.append(line.split("'")[1])
-                                    print(line.split("'")[1])
-                                    modsListDisabled.append(line.split("'")[1])
+                    # sometimes people copy paste the log into Discord which results in the log being called `message.txt` on Discord
+                    # check_for_log checks that Northstar is in the file, and checks it at as a log if it is
+                    if 'message' in filename and filename.endswith('.txt'):
+                        if os.path.exists("Logs") == False:
+                            os.mkdir("Logs")
 
-                                if "blacklisted mod" in line:
-                                    modsListDisabled.append(line.split('"')[1] + " (blacklisted)\n")
-                                    
-                                if "Loading mod" in line:
+                        await message.attachments[0].save("Logs/nslogcheckvalid.txt")
+                        check_for_log("Logs/nslogcheckvalid.txt")
 
-                                    if "R2Northstar" in line:
-                                        continue
-                                    else:
-                                        for mod in modsListDisabled:
-                                            if mod + "\n" in line:
-                                                continue
-                                            else:
-                                                modsList.append(line.split("Loading mod")[1])
+                    if os.path.exists("Logs"):
 
-                                    # Check if HUD Revamp is installed: conflicts with Client Kill callback
-                                    if "HUD Revamp" in line:
-                                        dmLog.add_field(name="", value="HUD Revamp: True", inline=False)
-                                        print("I found HUD Revamp!")
-                                        hud = True
+                        enabledMods.clear()
+                        disabledMods.clear()
+                        errorMessages.clear()
 
-                                    # Check if Client Kill callback is installed: conflicts with HUD Revamp
-                                    if "ClientKillCallback" in line:
-                                        dmLog.add_field(name="", value="Client Kill Callback: True", inline=False)
-                                        print("I found Client Kill Callback!")
-                                        problemFound = True
-                                        callback = True
+                        check_mods("Logs/nslogunparsed.txt")
+                        
+                        check_errorMessages("Logs/nslogunparsed.txt")
 
-                                    # Check if the OLD, merged better server browser is loading. It's broken now and causes issues
-                                    if "Better.Serverbrowser" in line:
-                                        dmLog.add_field(name="", value="Better.Serverbrowser: True", inline=False)
-                                        print("I found better server browser!")
-                                        problemFound = True
-                                        betterServerBrowser = True
-                                
-                                # Check for a compile error for missing Client Kill callback as a dependency, or when there's a conflict with it
-                                if "COMPILE ERROR expected \",\", found identifier \"inputParams\"" in line:
-                                    dmLog.add_field(name="", value="Client kill callback compile error: True", inline=False)
-                                    print("I found a compile error!")
-                                    problemFound = True
-                                    compileErrorClientKillCallback = True
+                        # ngl this is a little gross
+                        match check_errors():
+                            case "HudRevampClientKillCallback":
+                                shouldRespond = True
+                                problem.add_field(name="HUD Revamp Client Kill Callback conflict", value="HUD Revamp and Client Kill Callback currently conflict.\n\nYou can fix this temporarily by installing the [ClientKillCallback HUDRevamp Compatability patch](https://northstar.thunderstore.io/package/Capt_Diqhedd/ClientKillCallback_HUDRevamp_Compatibility_Patch/), or by disabling/uninstalling HUD Revamp")
+                                print("Found a HUD Revamp Client Kill Callback conflict!")
 
-                                if "COMPILE ERROR Undefined variable \"ModSettings_AddDropdown\"" in line:
-                                    dmLog.add_field(name="", value="Missing negativbild: True", inline=False)
-                                    print("I found a person missing negativbild!")
-                                    problemFound = True
-                                    rgbError = True
-                                
-                                if "COMPILE ERROR Undefined variable \"NS_InternalLoadFile\"" in line:
-                                    dmLog.add_field(name="", value="Titan Framework issue: True", inline=False)
-                                    print("I found a titan framework issue >:(")
-                                    problemFound = True
-                                    frameworkError = True
+                            case "VanillaPlusAndClientInstalled":
+                                shouldRespond = True
+                                problem.add_field(name="Northstar.Client installed on VanillaPlus", value="I noticed that you have Northstar.Client installed while using VanillaPlus! As of 2.0, this is no longer required.\n\nYou should follow the [instructions from the mod page](https://northstar.thunderstore.io/package/NanohmProtogen/VanillaPlus/) for steps on how to install VanillaPlus properly")
+                                print("Found Northstar.Client installed with VanillaPlus!")
 
-                                # Check for audio replacements being loaded
-                                # If 2 seperate mods replacing the same audio are enabled at the same time the game fucking kills itself
-                                if "Finished async read of audio sample" in line:
-                                    
-                                    if "packages" in line:
-                                    # Split the string after "R2Northstar/mods" to keep the folder name onwards
-                                        a = line.split("R2Northstar\packages")[1]
-                                    if "R2Northstar\mods" in line:
-                                        a = line.split("R2Northstar\mods")[1]
-                                    # Split the previous split at "audio" to cleanly format as "FolderName, audioname" 
-                                    # side note: why the fuck don't we use the mod name at all literally anywhere even when registering the audio fully
-                                    b = a.split("audio")
-                                    # Further clean up the last split
-                                    c = [item.split('\\')[1] for item in b]
-                                    
-                                    # Add these to the audio list for checking for errors
-                                    audioList.append(c)
+                            case "VanillaPlusDisabled":
+                                shouldRespond = True
+                                problem.add_field(name="VanillaPlus disabled", value="I noticed that you had an issue with VanillaPlus, but that it is disabled.\n\nDeleting `enablemods.json` from `Titanfall2/R2Titanfall` (assuming you followed one of the install guides) will forcibly enable ALL mods, which will fix the issue with VanillaPlus loading, but might re-introduce errors you solved if you disabled other mods")
+                                print("Found disabled VanillaPlus error")
 
-                                if "[NORTHSTAR] [error] Northstar has crashed! a minidump has been written and exception info is available below:" in line: # Checks for first line of the crash section of the log
-                                    checkLine = lines[i - 2] # Stores the previous line (right before the crash), we have to skip the version printout
-                                    crashCounter += 1
-                                    if crashCounter == 2: # More than 1 crash, flip multiCrash to true. Only needs to happen once so check for equality
-                                        multiCrash = True
-                                    elif "LoadStreamPak" in checkLine and crashCounter == 1: # Check for paks being loaded right before crash, only search if one crash 
-                                        modProblem = True
-                                        # Use regex to grab the name of the pak that probably failed
-                                        match = re.search(r'LoadStreamPak: (\S+)', checkLine)
-                                        global badStreamPakLoad
-                                        badStreamPakLoad = str(match.group(1))
-                                        problemFound = True
+                            case "RemoveLockedMultiplayer":
+                                shouldRespond = True
+                                problem.add_field(name="Remove Locked Multiplayer", value="Remove Locked Multiplayer relied on a function in Northstar that is no longer present. Please disable/delete the mod")
 
-                                        # this shit is so fucking gross oh my fucking god
-                                        # i am so sorry for what i did to your code tony
-                                        for lineAgain in lines:
-                                            if f"registered starpak '{badStreamPakLoad}'" in lineAgain:
-                                                   
-                                                match = re.search(r'Mod\s+(.*?)\s+registered', lineAgain)                                               
-                                                badStreamPakLoad = match.group(1) # Store problematic mod in global var
+                            case "MissingNegativBild":
+                                shouldRespond = True
+                                problem.add_field(name="Missing Dependency: NegativBild", value="It looks like you're having an issue with NegativBild (a dependency for mods like Provoxin RGB) where it isn't loading.\n\nEnable it if it's disabled, otherwise install it from [Thunderstore](https://northstar.thunderstore.io/package/odds/Negativbild/), or from a mod manager")
+                                print("Found a missing dependency: NegativBild!")
 
-                                        file.close()
+                            case "MissingClientKillCallback":
+                                shouldRespond = True
+                                problem.add_field(name="Missing Dependency: ClientKillCallback", value="It looks like you're having an issue with ClientKillCallback (a dependency for mods like Champions 2023 vandal and KraberPrimrose) where it isn't loading.\n\nEnable it if it's disabled, otherwise install it from [Thunderstore](https://northstar.thunderstore.io/package/S2Mods/ClientKillCallback/), or from a mod manager")
+                                print("Found a missing dependency: ClientKillCallback")
 
-                                        with open(r"Logs/nslogstarpaks.txt", "w") as file1:
-                                            file1.write(f"Bad streampak: {badStreamPakLoad}")
-                                            file1.close()
-                                        
-                                        with open(r"Logs/nslogstarpaks.txt", "r") as file2:
-                                            lines = file2.readlines()
+                            case _:
+                                print("I couldn't find any matching errors!")
+                                shouldRespond = False
 
-                                            for i, line in enumerate(lines):
-                                                if "Bad streampak: " in line:
-                                                    badMod = line.split("Bad streampak: ")[1]
-
-
-                                                    # Run back over the log to find what mod the pak is registered with
-                                                    if badMod == "Northstar.Custom":
-                                                        doubleBarrelCrash = True             
-                                                    file2.close()
-                                                    break # End the loop as it is no longer useful
-
-                        # Properly set up the list for actual checking
-                        d = list(set(tuple(audio) for audio in audioList))
-
-                        # Set up a list for checking duplicates
-                        audio_duplicates_list = {}
-
-                        for item in d:
-                            # Grab the audio replacement string (e.g. "player_killed_indicator") and add it to a list to check directly for conflicts
-                            audio_duplicate = item[1]
-
-                            # If the audio override already in the list, add the mod name to the list
-                            if audio_duplicate in audio_duplicates_list:
-                                audio_duplicates_list[audio_duplicate].append(item[0])
-                            else:
-                                audio_duplicates_list[audio_duplicate] = [item[0]]                        
-
-                        for audio_duplicate, names in audio_duplicates_list.items():
-                            if len(names) > 1:
-                                problemFound = True
-                                print(f"Found duplicates of {audio_duplicate}: {', '.join(names)}")
-
-                        if problemFound == True:
-                            print("Found problems in the log! Replying...")   
+                        if shouldRespond == True: 
                             await message.channel.typing()
                             sleep(5)
-
-                            if disabledCoreMod == True:
-                                disabledCoreString = ""     
-
-                                if len(modsDisabledCore) > 1:
-                                    if len(modsDisabledCore) == 2:
-                                        for mod in modsDisabledCore:
-                                            disabledCoreString = disabledCoreString + mod       
-
-                                    problem.add_field(name="Disabled core mods", value=f"The core mods {disabledCoreString} are disabled! Please re-enable them using a mod manager or by deleting `Titanfall2/R2Northstar/enabledmods.json` (this only applies if trying to play Northstar. If you are playing vanilla via Northstar and encountering an issue, it is something else)", inline=False)
-
-                                elif len(modsDisabledCore) == 1:
-                                    for mod in modsDisabledCore:
-                                        disabledCoreString = disabledCoreString + mod
-                                    problem.add_field(name="Disabled core mod", value=f"The core mod {disabledCoreString} is disabled! Please re-enable it using a mod manager or by deleting `Titanfall2/R2Northstar/enabledmods.json` (this only applies if trying to play Northstar. If you are playing vanilla via Northstar and encountering an issue, it is something else)", inline=False)
-      
-                            if hud == True and callback == True and compileErrorClientKillCallback == True:
-                                problem.add_field(name="", value="I noticed you have both HUD Revamp and Client Kill Callback installed. Currently, these two mods create conflicts. The easiest way to solve this is to delete/disable HUD Revamp.", inline=False)
-
-                            else:
-                                
-                                if compileErrorClientKillCallback:
-                                    problem.add_field(name="Missing dependency!", value="One or more mods you have may require the mod [Client killcallback](https://northstar.thunderstore.io/package/S2Mods/KraberPrimrose/) to work. Please install or update the mod via a mod manager or Thunderstore.", inline=False)
-
-                            if rgbError == True:
-                                problem.add_field(name="Missing dependency!",value="One or more mods you have may require the mod [Negativbild](https://northstar.thunderstore.io/package/odds/Negativbild/) to work. Please install or update this mod via a mod manager or Thundersore")
-                            
-                            if frameworkError == True:
-                                problem.add_field(name="Titan Framework", value="Currently, Titan Framework expects a work in progress Northstar feature to function. As such, having it installed will cause issues (temporarily, until the feature is implemented), which uninstalling it will fix. You can temporarily make it work by manually installing the mod by moving the plugins inside the `plugins` folder of the mod into `r2northstar/plugins`, however this is a TEMPORARY fix, and you'll have to undo it when Northstar gets its next update.", inline=False)
-
-                            if betterServerBrowser == True:
-                                problem.add_field(name="Better server browser", value="There are two mods called better server browser. The one called \"Better.Serverbrowser\" causes issues when installed, as it was added to Northstar a while ago. Removing it should fix that specific issue.")
-
-                            for audio_duplicate, names in audio_duplicates_list.items():
-                                if len(names) > 1:
-                                    audioProblem = True
-                                    problem.add_field(name="Audio replacement conflict", value=f"The following mods replace the same audio (`{audio_duplicate}`):\n {', '.join(names)}", inline=False)
-                                    dmLog.add_field(name="Audio replacement conflict", value=f"The following mods replace the same audio (`{audio_duplicate}`):\n {', '.join(names)}", inline=False)
-
-
-                            if oldVersion == True:
-                                problem.add_field(name="Older Version", value=f"It seems that you're running an older version of Northstar. Updating may not solve your issue, but you should do it anyway. The current version is {versionCheck()}. Please update by using one of the methods in the [installation channel](https://discord.com/channels/920776187884732556/922662496588943430).", inline=False)
-                                problem.add_field(name="\u200b", value="If you've already updated and are still seeing this, please check if you have a file called `northstar.dll` in `titanfall2/R2Northstar`. If you do, delete it, and try launching again.", inline=False)
-
-                            
-                            if audioProblem == True:
-                                problem.add_field(name="Fixing audio replacement conflicts", value="Please remove mods until only one of these audio mods are enabled. These names aren't perfect to what they are for the mod, however they are the file names for the mod, so you can just remove the folder matching the name from `Titanfall2/R2Northstar/mods`.", inline=False)
-
-                            if modProblem == True:  
-                                if doubleBarrelCrash == True:
-
-                                    problem.add_field(name="Mod crashing", value= "Northstar crashed right after loading the double barrel assets.\nPlease try deleting `w_shotgun_doublebarrel.mdl` from `Titanfall2/R2Northstar/mods/Northstar.Custom/mod/models/weapon/shotgun_doublebarrel`.\nDoing this will solve this specific crash, but will make you hold an error when trying to use the double barrel in game.")
-
-                                else:
-
-                                    problem.add_field(name="Mod crashing", value=f"Northstar crashed right after attempting to load as asset from the mod `{badMod}`. Please try removing/disabling this mod to see if this solves the issue.")
-                            
-                            problem.add_field(name="", value="Please note that I am a bot and am still heavily being worked on. There is a chance that some or all of this information is incorrect, in which case I apologize.\nIf you still encounter issues after doing this, please send another log.", inline=False)
-                            await message.channel.send(embed=problem, reference=message)     
-                            
-                            dmme = await self.bot.fetch_user(self.bot.owner_id)
-
-                            if len(problem.fields) > 0:
-                                problem.add_field(name="", value="Please note that I am a bot and am still heavily being worked on. There is a chance that some or all of this information is incorrect, in which case I apologize.\nIf you still encounter issues after doing this, please send another log.", inline=False)
-                                await message.channel.send(embed=problem, reference=message, view=view)     
-                                dmLog.add_field(name="I found an issue in the log and replied!", value=f"A link to their log can be found here: {message.jump_url}")
-                                await dmme.send(embed=dmLog)
-                            else:
-                                await dmme.send(f"I failed to respond to a log! The log can be found here: {message.jump_url}")
-                                await message.channel.send("I failed to respond to the log properly!")
-                                
-                            dmLog.clear_fields()
-
-                            audio_duplicates_list.clear()
-                            audioList.clear()
+                            await message.channel.send(embed=problem, reference=message)
                             problem.clear_fields()
-                            hud = False
-                            callback = False
-                            compileErrorClientKillCallback = False
-                            problemFound = False
-                            rgbError = False
-                            frameworkError = False
-                            betterServerBrowser = False
-                            oldVersion = False
-                            modProblem = False
-                            badMod = ""  
-
-                        elif problemFound == False:
-                            dmme = await self.bot.fetch_user(self.bot.owner_id)
-                            dmLog.add_field(name="I didn't find any issues!", value=f"Here's a log you could potentially train from: {message.jump_url}")
-                            await dmme.send(embed=dmLog)
-                            dmLog.clear_fields()
-
-                            print("I didn't find any problems in the log!")
-
+                    
                         shutil.rmtree("Logs")
             
 async def setup(bot: commands.Bot) -> None:
