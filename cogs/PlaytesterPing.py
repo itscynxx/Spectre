@@ -60,8 +60,8 @@ class PlayTesterPing(commands.Cog):
         
     @commands.Cog.listener()
     async def on_message(self, message):
-        playtestPingChannel = self.bot.get_channel(1170820923113357343)
-        thunderstoreReleaseChannel = self.bot.get_channel(1170820797653336077)
+        playtestPingChannel = self.bot.get_channel(936678773150081055)
+        thunderstoreReleaseChannel = self.bot.get_channel(939573786355859498)
 
         if message.author == self.bot.user:
             return
@@ -81,7 +81,7 @@ class PlayTesterPing(commands.Cog):
                 embed.set_author(name="Northstar " + rcVersion, icon_url="https://avatars.githubusercontent.com/u/86304187")
                 
                 pingMessage = await playtestPingChannel.send(
-                    f"""<@&1170828808702673147>
+                    f"""<@&936669179359141908>
 There is a new Northstar release candidate, `{rcVersion}`. If you find any issues or have feedback, please inform us in the thread attached to this message.
 ## **Installation**:
 **If you have __not__ installed a release candidate before**
