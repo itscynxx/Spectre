@@ -15,17 +15,11 @@ def getLatestDiscussion():
     query = """
     query {
         repository(owner: "R2Northstar", name: "Northstar") {
-            discussions(first: 1) {
+            discussions(first: 1 categoryId: "DIC_kwDOGkM8Yc4CN-04") {
                 edges { 
                     node {
-                        author {
-                            login
-                            url
-                        }
-                        title
-                        number
-                        body
                         url
+                        body
                     }
                 }
             }
@@ -42,10 +36,7 @@ def getLatestDiscussion():
         return None
     
     discussion_post = {
-        'author': raw_data["data"]["repository"]["discussions"]["edges"][0]["node"]["author"]["login"],
-        'title': raw_data["data"]["repository"]["discussions"]["edges"][0]["node"]["title"],
         'body': raw_data["data"]["repository"]["discussions"]["edges"][0]["node"]["body"],
-        'number': raw_data["data"]["repository"]["discussions"]["edges"][0]["node"]["number"],
         'url': raw_data["data"]["repository"]["discussions"]["edges"][0]["node"]["url"]
     }
     
@@ -92,10 +83,16 @@ class PlayTesterPing(commands.Cog):
                 embed.set_author(name="Northstar " + rcVersion, icon_url="https://avatars.githubusercontent.com/u/86304187")
                 
                 pingMessage = await playtestPingChannel.send(
-                    f"""<@&936669179359141908>, there is a new Northstar release candidate, `{rcVersion}`. If you find any issues or have feedback, please inform us in the thread attached to this message.
+                    f"""<@&936669179359141908>
+There is a new Northstar release candidate, `{rcVersion}`. If you find any issues or have feedback, please inform us in the thread attached to this message.
+## **Installation**:
+**If you have __not__ installed a release candidate before:**
+Go to settings in FlightCore, and enable testing release channels. After you've done that, go to the play tab, click the arrow next to `LAUNCH GAME`, and select `Northstar release candidate`. Then, click the `UPDATE` button.
 
-**Installation**:
-Go to settings in FlightCore, and enable testing release channels (you only need to do this once). After you've done that, go to the play tab, click the arrow next to `LAUNCH GAME`, and select `Northstar release candidate`. Then, click the `UPDATE` button.""",
+**If you have installed a release candidate before:**
+Make sure your release channel is still set to `Northstar release candidate`, and click the `UPDATE` button.
+## **Release Notes**:
+<{data["url"]}>""",
                     embed=embed
                 )
                 await pingMessage.create_thread(name=rcVersion)
