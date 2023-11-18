@@ -18,6 +18,7 @@ def getLatestDiscussion():
             discussions(first: 1 categoryId: "DIC_kwDOGkM8Yc4CN-04") {
                 edges { 
                     node {
+                        url
                         body
                     }
                 }
@@ -36,6 +37,7 @@ def getLatestDiscussion():
     
     discussion_post = {
         'body': raw_data["data"]["repository"]["discussions"]["edges"][0]["node"]["body"],
+        'url': raw_data["data"]["repository"]["discussions"]["edges"][0]["node"]["url"]
     }
     
     return discussion_post
@@ -88,7 +90,9 @@ There is a new Northstar release candidate, `{rcVersion}`. If you find any issue
 Go to settings in FlightCore, and enable testing release channels. After you've done that, go to the play tab, click the arrow next to `LAUNCH GAME`, and select `Northstar release candidate`. Then, click the `UPDATE` button.
 
 **If you have installed a release candidate before:**
-Make sure your release channel is still set to `Northstar release candidate`, and click the `UPDATE` button.""",
+Make sure your release channel is still set to `Northstar release candidate`, and click the `UPDATE` button.
+## **Release Notes**:
+<{data["url"]}>""",
                     embed=embed
                 )
                 await pingMessage.create_thread(name=rcVersion)
