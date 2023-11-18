@@ -84,7 +84,7 @@ class PlayTesterPing(commands.Cog):
                     f"""<@&936669179359141908>
 There is a new Northstar release candidate, `{rcVersion}`. If you find any issues or have feedback, please inform us in the thread attached to this message.
 ## **Installation**:
-**If you have __not__ installed a release candidate before**
+**If you have __not__ installed a release candidate before:**
 Go to settings in FlightCore, and enable testing release channels. After you've done that, go to the play tab, click the arrow next to `LAUNCH GAME`, and select `Northstar release candidate`. Then, click the `UPDATE` button.
 
 **If you have installed a release candidate before**
